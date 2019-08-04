@@ -73,7 +73,7 @@ async function run(username){
   });
 
   // Scroll and extract items from the page.
-  let items = await scrapeInfiniteScrollItems(page, extractItems, 3);
+  let items = await scrapeInfiniteScrollItems(page, extractItems, 120);
   //old to new
   items = items.reverse();
   items.pop();
