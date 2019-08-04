@@ -50,12 +50,14 @@ async function downloadVid(page, url){
   const response = await axios({
     url: src,
     method: 'GET',
-    responseType: 'stream'
+    //responseType: 'stream'
+    responseType: 'arraybuffer'
   });
 
   const fileName = url.split('/').pop() + '.mp4';
   const location = path.resolve(__dirname, 'videos', fileName);
-  response.data.pipe(fs.createWriteStream(location));
+  //response.data.pipe(fs.createWriteStream(location));
+  fs.writeFileSync(location, response.data );
   vids.push(location);
 }
 
@@ -74,41 +76,35 @@ async function downloadVid(page, url){
   });
 
   // Scroll and extract items from the page.
-  let items = await scrapeInfiniteScrollItems(page, extractItems, 10);
+  let items = await scrapeInfiniteScrollItems(page, extractItems, 3);
   //old to new
   items = items.reverse();
   items.pop();
 
-  execSync('mkdir videos');
+  execSync('rm -rf videos && mkdir videos');
+  execSync('rm -f output.mp4');
 
   for(let item of items)
     await downloadVid(page, item);
 
+  // Close the browser.
+  await browser.close();
 
   /*fs.readdir(path.resolve(__dirname, 'videos'), (err, files) => {
     files.forEach(f => console.log(f));
   });*/
   //console.log(urls);
 
-  //no way this works
-  /*await concat({
-    output: 'test.mp4',
-    videos: vids
-  });*/
 
-  //console.log(vids);
-  //fs.writeFileSync('./videos.txt', 'file \'' + vids.join('\'\nfile \'') + '\n');
-  execSync(`ffmpeg -i ${vids[0]} -c copy -bsf:v h264_mp4toannexb videos/temp${0}.ts`);
-  execSync(`ffmpeg -i ${vids[1]} -c copy -bsf:v h264_mp4toannexb videos/temp${1}.ts`);
-  execSync(`ffmpeg -i ${vids[2]} -c copy -bsf:v h264_mp4toannexb videos/temp${2}.ts`);
+  for(let vid of vids)
+    execSync(`ffmpeg -i ${vid} -c copy -bsf:v h264_mp4toannexb ${vid}.ts`);
 
-  let something = 'videos/temp0.ts|videos/temp1.ts|videos/temp2.ts';
+  //let something = 'videos/temp0.ts|videos/temp1.ts|videos/temp2.ts';
+  let something = vids.join('.ts|') + '.ts';
 
+  console.log(`ffmpeg -i "concat:${something}" -c copy -absf aac_adtstoasc output.mp4`);
   execSync(`ffmpeg -i "concat:${something}" -c copy -absf aac_adtstoasc output.mp4`);
 
   execSync('rm -rf videos/');
 
-
-  // Close the browser.
-  await browser.close();
 })();
