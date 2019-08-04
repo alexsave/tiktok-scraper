@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
-const concat = require('ffmpeg-concat');
 const {execSync} = require('child_process');
 
 let vids = [];
@@ -50,18 +49,16 @@ async function downloadVid(page, url){
   const response = await axios({
     url: src,
     method: 'GET',
-    //responseType: 'stream'
     responseType: 'arraybuffer'
   });
 
   const fileName = url.split('/').pop() + '.mp4';
   const location = path.resolve(__dirname, 'videos', fileName);
-  //response.data.pipe(fs.createWriteStream(location));
   fs.writeFileSync(location, response.data );
   vids.push(location);
 }
 
-(async () => {
+async function run(username){
   // Set up browser and page.
   const browser = await puppeteer.launch({
     //headless: false,
@@ -71,7 +68,7 @@ async function downloadVid(page, url){
   await page.setViewport({width: 1280, height: 926});
 
   // Navigate to the demo page.
-  await page.goto('https://tiktok.com/@qzim', {
+  await page.goto('https://tiktok.com/@' + username,{
     waitUntil: 'load', timeout: 0
   });
 
@@ -90,16 +87,9 @@ async function downloadVid(page, url){
   // Close the browser.
   await browser.close();
 
-  /*fs.readdir(path.resolve(__dirname, 'videos'), (err, files) => {
-    files.forEach(f => console.log(f));
-  });*/
-  //console.log(urls);
-
-
   for(let vid of vids)
     execSync(`ffmpeg -i ${vid} -c copy -bsf:v h264_mp4toannexb ${vid}.ts`);
 
-  //let something = 'videos/temp0.ts|videos/temp1.ts|videos/temp2.ts';
   let something = vids.join('.ts|') + '.ts';
 
   console.log(`ffmpeg -i "concat:${something}" -c copy -absf aac_adtstoasc output.mp4`);
@@ -107,4 +97,6 @@ async function downloadVid(page, url){
 
   execSync('rm -rf videos/');
 
-})();
+}
+
+run('qzim');
