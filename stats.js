@@ -1,18 +1,10 @@
-const fs = require('fs');
-const path = require('path');
 const puppeteer = require('puppeteer');
-const axios = require('axios');
-const {execSync} = require('child_process');
-
-let vids = [];
 
 function extractItems() {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
   const items = [];
-  for (let element of extractedElements) {
-    console.log(element);
+  for (let element of extractedElements)
     items.push(element.href);
-  }
   return items;
 }
 
@@ -38,30 +30,29 @@ async function scrapeInfiniteScrollItems(
   return items;
 }
 
-async function downloadVid(page, url){
-
+/*
+  Tiktok videos have timestamps on the video page if you look closely
+ */
+async function moreStats(page, url){
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
 
-  const src = await page.evaluate(() => document.querySelector('video').src);
+  const videoObject= await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
 
-  const response = await axios({
-    url: src,
-    method: 'GET',
-    responseType: 'arraybuffer'
-  });
-
-  const fileName = url.split('/').pop() + '.mp4';
-  const location = path.resolve(__dirname, 'videos', fileName);
-  fs.writeFileSync(location, response.data );
-  vids.push(location);
+  return {
+    url,
+    uploadDate: videoObject.uploadDate,
+    comments: videoObject.commentCount,
+    likes: videoObject.interactionCount,
+    title: videoObject.name
+  };
 }
 
 async function run(username){
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    //headless: false,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -73,29 +64,16 @@ async function run(username){
   });
 
   // Scroll and extract items from the page.
-  let items = await scrapeInfiniteScrollItems(page, extractItems, 120);
+  let urls = await scrapeInfiniteScrollItems(page, extractItems, 120);
   //old to new
-  items = items.reverse();
-  items.pop();
+  //items = items.reverse();
+  //items.pop();
 
-  execSync('rm -rf videos && mkdir videos');
-  execSync('rm -f output.mp4');
-
-  for(let item of items)
-    await downloadVid(page, item);
+  let videoObjects = urls.map(url => moreStats(page, url));
+  console.log(videoObjects);
 
   // Close the browser.
   await browser.close();
-
-  for(let vid of vids)
-    execSync(`ffmpeg -i ${vid} -c copy -bsf:v h264_mp4toannexb ${vid}.ts`);
-
-  let something = vids.join('.ts|') + '.ts';
-
-  execSync(`ffmpeg -i "concat:${something}" -c copy -absf aac_adtstoasc ${username}.mp4`);
-
-  execSync('rm -rf videos/');
-
 }
 
 run('qzim');
