@@ -1,4 +1,9 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
+
+//the master array of all shit
+const map = [];
+const FILE = './stats.json';
 
 const extractItems = () => {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
@@ -42,12 +47,13 @@ const scrapeScrollItems = async (
 /*
   Tiktok videos have timestamps on the video page if you look closely
  */
-const moreStats = async (page, url) => {
+const moreStats = async (page, url, statsDelay) => {
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
+  await page.waitFor(100 + Math.random()*(statsDelay-100));
 
-  const videoObject= await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
+  const videoObject = await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
 
   return {
     url,
@@ -61,7 +67,7 @@ const moreStats = async (page, url) => {
 const run = async (username) => {
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    headless: false,
+    //headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -74,20 +80,23 @@ const run = async (username) => {
 
   // Scroll and extract items from the page.
   let urls = await scrapeScrollItems(page, extractItems, 100);
+  urls = urls.reverse();
 
-  console.log(urls);
-  console.log(urls.length);
+  //console.log(urls);
+  //console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
-  for(let url of urls){
-    console.log(url);
-    videoObjects.push(await moreStats(page, url));
-  }
+  for(let url of urls)
+    videoObjects.push(await moreStats(page, url, 500));
 
-  console.log(videoObjects);
+  map.push({username, timestamp: new Date().getTime(), data: videoObjects});
+
+  //save that shit
+  fs.writeFile(FILE, JSON.stringify(map), err => {});
 
   // Close the browser.
   await browser.close();
+
 };
 
 run('qzim');

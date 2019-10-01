@@ -2,4 +2,6 @@ node_modules/
 .idea/
 videos/
 *.mp4
+stats.json
+
 
