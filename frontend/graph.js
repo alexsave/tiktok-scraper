@@ -6,12 +6,17 @@ class TikGraph{
   root;
   constructor(div){
     this.root = div;
-    axios.post(url, { username });
-    let x;
+    axios.post(url, { username })
+      .then(this.graphResponse)
 
 
 
   }
+
+  graphResponse = res => {
+    console.log(res);
+
+  };
 
 }
 

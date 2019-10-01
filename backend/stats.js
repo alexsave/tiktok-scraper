@@ -119,7 +119,6 @@ const getUserData = async (username) => {
 
   // Close the browser.
   await browser.close();
-  loading[username] = false;
   return videoObjects;
 };
 
@@ -128,8 +127,11 @@ const loadCache = file => {
     let raw = fs.readFileSync(file);
     map = JSON.parse(raw.toString());
   }
-  catch(err){}
+  catch(err){console.log(err);}
   loadedCache = true;
+  console.log(map);
+  for(let u of Object.keys(map))
+    console.log(u);
 };
 
 loadCache(FILE);
@@ -146,8 +148,11 @@ app.post('/username', (req, res) => {
     res.send('Loading user, try again later');
     return;
   }
-  getUserData(username).then(result =>
-    res.send(result)
+  loading[username] = true;
+  getUserData(username).then(result =>{
+      loading[username] = false;
+      res.send(result);
+    }
   );
 });
 
