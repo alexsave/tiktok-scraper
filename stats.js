@@ -1,39 +1,48 @@
 const puppeteer = require('puppeteer');
 
-function extractItems() {
+const extractItems = () => {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
   const items = [];
   for (let element of extractedElements)
     items.push(element.href);
   return items;
-}
+};
 
-async function scrapeInfiniteScrollItems(
+const scrollDown = async (page, scrollDelay) => {
+  let newHeight, oldHeight = await page.evaluate('document.body.scrollHeight');
+  while(true){
+    await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
+    await page.waitFor(1000 + Math.random()*(scrollDelay-1000));
+
+    newHeight = await page.evaluate('document.body.scrollHeight');
+    if(oldHeight >= newHeight)
+      break;
+    oldHeight = newHeight;
+  }
+};
+
+/*
+  Scroll down and use a function to get all video urls
+ */
+const scrapeScrollItems = async (
   page,
   extractItems,
-  itemTargetCount,
+  minItemCount,
   scrollDelay = 1000,
-) {
+) => {
   let items = [];
-  try {
-    let previousHeight;
-    while (items.length < itemTargetCount) {
-      items = await page.evaluate(extractItems);
-      previousHeight = await page.evaluate('document.body.scrollHeight');
-      await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-      await page.waitForFunction(`document.body.scrollHeight > ${previousHeight}`);
-      await page.waitFor(scrollDelay);
-    }
-  } 
-  catch(e) { }
+  while (items.length < minItemCount) {
+    await scrollDown(page, scrollDelay);
+    items = await page.evaluate(extractItems);
+  }
 
   return items;
-}
+};
 
 /*
   Tiktok videos have timestamps on the video page if you look closely
  */
-async function moreStats(page, url){
+const moreStats = async (page, url) => {
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
@@ -47,9 +56,9 @@ async function moreStats(page, url){
     likes: videoObject.interactionCount,
     title: videoObject.name
   };
-}
+};
 
-async function run(username){
+const run = async (username) => {
   // Set up browser and page.
   const browser = await puppeteer.launch({
     headless: false,
@@ -64,11 +73,9 @@ async function run(username){
   });
 
   // Scroll and extract items from the page.
-  let urls = await scrapeInfiniteScrollItems(page, extractItems, 120);
-  //old to new
-  //items = items.reverse();
-  //items.pop();
+  let urls = await scrapeScrollItems(page, extractItems, 100);
 
+  console.log(urls);
   console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
@@ -81,6 +88,6 @@ async function run(username){
 
   // Close the browser.
   await browser.close();
-}
+};
 
 run('qzim');
