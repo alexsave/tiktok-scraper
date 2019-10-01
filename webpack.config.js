@@ -4,18 +4,18 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: './frontend/index.js',
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'frontend', 'dist'),
     filename: 'bundle.js'
   },
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: path.join(__dirname, 'frontend', 'dist'),
     port: 3000,
     hot: true
   },
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: 'index.html'
+      template: 'frontend/index.html'
     })
   ],
   module: {
