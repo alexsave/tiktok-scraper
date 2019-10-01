@@ -139,14 +139,14 @@ loadCache(FILE);
 app.use(cors());
 app.use(express.json());
 
-app.get('/user', (req, res) => {
-  const user = req.body.user;
-  console.log('get', user);
-  if(loading[user]){
+app.post('/username', (req, res) => {
+  const username = req.body.username;
+  console.log('get', username);
+  if(loading[username]){
     res.send('Loading user, try again later');
     return;
   }
-  getUserData(user).then(result =>
+  getUserData(username).then(result =>
     res.send(result)
   );
 });

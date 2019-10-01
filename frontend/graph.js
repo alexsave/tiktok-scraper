@@ -1,7 +1,15 @@
+import axios from 'axios';
+
+const url = 'http://localhost:3001/username';
+const username = 'qzim';
 class TikGraph{
-  div;
+  root;
   constructor(div){
-    this.div = div;
+    this.root = div;
+    axios.post(url, { username });
+    let x;
+
+
 
   }
 
