@@ -1,9 +1,15 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+require('./cleanup').Cleanup(() => {
+  if(loaded)
+    fs.writeFileSync(FILE, JSON.stringify(map));
+});
 
 //the master array of all shit
+let loaded = false;
 let map = {};
 const FILE = './stats.json';
+
 
 const extractItems = () => {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
@@ -118,12 +124,11 @@ const loadCache = file => {
     map = JSON.parse(raw.toString());
   }
   catch(err){}
+  loaded = true;
 };
 
-const run = async () => {
-  loadCache(FILE);
-  let x = await getUserData('shazy005');
-  //console.log(x);
-};
+loadCache(FILE);
 
-run();
+getUserData('shazy005');
+
+process.stdin.resume();
