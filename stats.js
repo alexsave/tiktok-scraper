@@ -70,7 +70,7 @@ const getUserData = async (username) => {
   const cached = map[username];
   if(cached){
     if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
-      return cached;
+      return cached.data;
   }
 
   // Set up browser and page.
@@ -94,10 +94,10 @@ const getUserData = async (username) => {
   //console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
-  let i = 0;
+  //let i = 0;
   for(let url of urls){
-    i += 1;
-    console.log(i/urls.length*100);
+    //i += 1;
+    //console.log(i/urls.length*100);
     videoObjects.push(await moreStats(page, url, 500));
   }
 
@@ -109,13 +109,21 @@ const getUserData = async (username) => {
 
   // Close the browser.
   await browser.close();
+  return videoObjects;
 };
 
 const loadCache = file => {
-  let raw = fs.readFileSync(file);
-  map = JSON.parse(raw.toString());
+  try{
+    let raw = fs.readFileSync(file);
+    map = JSON.parse(raw.toString());
+  }
+  catch(err){}
 };
 
-loadCache(FILE);
+const run = async () => {
+  loadCache(FILE);
+  let x = await getUserData('shazy005');
+  //console.log(x);
+};
 
-getUserData('shazy005');
+run();
