@@ -6,12 +6,13 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 require('./cleanup').Cleanup(() => {
-  if(loaded)
+  if(loadedCache)
     fs.writeFileSync(FILE, JSON.stringify(map));
 });
 
 //the master array of all shit
-let loaded = false;
+let loadedCache = false;
+const loading = {};
 let map = {};
 const FILE = './stats.json';
 
@@ -76,7 +77,7 @@ const moreStats = async (page, url, statsDelay) => {
 };
 
 const getUserData = async (username) => {
-  await loaded === true;
+  loading[username] = true;
   //check the cache
   const cached = map[username];
   if(cached){
@@ -120,6 +121,7 @@ const getUserData = async (username) => {
 
   // Close the browser.
   await browser.close();
+  loading[username] = false;
   return videoObjects;
 };
 
@@ -129,7 +131,7 @@ const loadCache = file => {
     map = JSON.parse(raw.toString());
   }
   catch(err){}
-  loaded = true;
+  loadedCache = true;
 };
 
 loadCache(FILE);
@@ -142,6 +144,10 @@ app.use(express.json());
 app.get('/user', (req, res) => {
   const user = req.body.user;
   console.log('get', user);
+  if(loading[user]){
+    res.send('Loading user, try again later');
+    return;
+  }
   getUserData(user).then(result =>
     res.send(result)
   );
