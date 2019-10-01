@@ -1,5 +1,10 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const cors = require('cors');
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3001;
+
 require('./cleanup').Cleanup(() => {
   if(loaded)
     fs.writeFileSync(FILE, JSON.stringify(map));
@@ -9,7 +14,6 @@ require('./cleanup').Cleanup(() => {
 let loaded = false;
 let map = {};
 const FILE = './stats.json';
-
 
 const extractItems = () => {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
@@ -72,6 +76,7 @@ const moreStats = async (page, url, statsDelay) => {
 };
 
 const getUserData = async (username) => {
+  await loaded === true;
   //check the cache
   const cached = map[username];
   if(cached){
@@ -100,10 +105,10 @@ const getUserData = async (username) => {
   //console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
-  //let i = 0;
+  let i = 0;
   for(let url of urls){
-    //i += 1;
-    //console.log(i/urls.length*100);
+    i += 1;
+    console.log(i/urls.length*100);
     videoObjects.push(await moreStats(page, url, 500));
   }
 
@@ -111,7 +116,7 @@ const getUserData = async (username) => {
   map[username] = {timestamp: new Date().getTime(), data: videoObjects};
 
   //save that shit
-  fs.writeFile(FILE, JSON.stringify(map), err => {});
+  //fs.writeFile(FILE, JSON.stringify(map), err => {});
 
   // Close the browser.
   await browser.close();
@@ -129,6 +134,20 @@ const loadCache = file => {
 
 loadCache(FILE);
 
-getUserData('shazy005');
+//now begins the server part
+//consider moving everythign above
+app.use(cors());
+app.use(express.json());
+
+app.get('/user', (req, res) => {
+  const user = req.body.user;
+  console.log('get', user);
+  getUserData(user).then(result =>
+    res.send(result)
+  );
+});
+
+app.listen(port, () => console.log(`listening on port ${port}`));
+
 
 process.stdin.resume();
