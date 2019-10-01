@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 //the master array of all shit
-const map = [];
+let map = {};
 const FILE = './stats.json';
 
 const extractItems = () => {
@@ -36,10 +36,11 @@ const scrapeScrollItems = async (
   scrollDelay = 1000,
 ) => {
   let items = [];
-  while (items.length < minItemCount) {
+  do{
     await scrollDown(page, scrollDelay);
     items = await page.evaluate(extractItems);
   }
+  while (items.length < minItemCount);
 
   return items;
 };
@@ -57,14 +58,21 @@ const moreStats = async (page, url, statsDelay) => {
 
   return {
     url,
-    uploadDate: videoObject.uploadDate,
-    comments: videoObject.commentCount,
-    likes: videoObject.interactionCount,
+    uploadDate: new Date(videoObject.uploadDate).getTime(),
+    likes: parseInt(videoObject.interactionCount),
+    comments: parseInt(videoObject.commentCount),
     title: videoObject.name
   };
 };
 
-const run = async (username) => {
+const getUserData = async (username) => {
+  //check the cache
+  const cached = map[username];
+  if(cached){
+    if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
+      return cached;
+  }
+
   // Set up browser and page.
   const browser = await puppeteer.launch({
     //headless: false,
@@ -79,24 +87,35 @@ const run = async (username) => {
   });
 
   // Scroll and extract items from the page.
-  let urls = await scrapeScrollItems(page, extractItems, 100);
+  let urls = await scrapeScrollItems(page, extractItems, 0);
   urls = urls.reverse();
 
   //console.log(urls);
   //console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
-  for(let url of urls)
+  let i = 0;
+  for(let url of urls){
+    i += 1;
+    console.log(i/urls.length*100);
     videoObjects.push(await moreStats(page, url, 500));
+  }
 
-  map.push({username, timestamp: new Date().getTime(), data: videoObjects});
+  //map.push(
+  map[username] = {timestamp: new Date().getTime(), data: videoObjects};
 
   //save that shit
   fs.writeFile(FILE, JSON.stringify(map), err => {});
 
   // Close the browser.
   await browser.close();
-
 };
 
-run('qzim');
+const loadCache = file => {
+  let raw = fs.readFileSync(file);
+  map = JSON.parse(raw.toString());
+};
+
+loadCache(FILE);
+
+getUserData('shazy005');
