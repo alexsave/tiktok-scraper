@@ -102,14 +102,12 @@ const getUserData = async (username) => {
   let urls = await scrapeScrollItems(page, extractItems, 0);
   urls = urls.reverse();
 
-  //console.log(urls);
-  //console.log(urls.length);
   let videoObjects = [];
   //urls.map(url => await moreStats(page, url));
   let i = 0;
   for(let url of urls){
     i += 1;
-    console.log(i/urls.length*100);
+    console.log(username, i/urls.length*100);
     videoObjects.push(await moreStats(page, url, 500));
   }
 

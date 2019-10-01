@@ -1,12 +1,11 @@
-import MyCanvas from './js/MyCanvas';
+import TikGraph from "./graph";
 
 while(document.body.hasChildNodes())
   document.body.removeChild(document.body.firstChild);
 
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
-const myCanvas = new MyCanvas();
-myCanvas.render(canvas);
+const root = document.createElement('div');
+document.body.appendChild(root);
+new TikGraph(root);
 
 if(module.hot)
   module.hot.accept();
