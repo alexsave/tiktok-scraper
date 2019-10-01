@@ -69,7 +69,14 @@ async function run(username){
   //items = items.reverse();
   //items.pop();
 
-  let videoObjects = urls.map(url => moreStats(page, url));
+  console.log(urls.length);
+  let videoObjects = [];
+  //urls.map(url => await moreStats(page, url));
+  for(let url of urls){
+    console.log(url);
+    videoObjects.push(await moreStats(page, url));
+  }
+
   console.log(videoObjects);
 
   // Close the browser.
