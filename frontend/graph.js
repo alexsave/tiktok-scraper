@@ -3,7 +3,7 @@ import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
 const allUrl = 'http://localhost:3001/all';
-const username = '*';
+const username = 'qzim';
 
 const weekdayName = [
   'Sunday',
@@ -41,6 +41,7 @@ class TikGraph{
 
   //we have the data in the browser
   graphResponse = res => {
+    res.forEach(vid => vid.uploadDate*= 1000);
     //first one, let's plot date+time vs likes
     this.timeline(res);
 
@@ -54,6 +55,7 @@ class TikGraph{
 
   timeline = res => {
     const likeData = res.map(vid => ({ x: new Date(vid.uploadDate), y: vid.likes }));
+    console.log(likeData);
     this.genericGraph(likeData, 'date');
   };
 
