@@ -2,7 +2,8 @@ import axios from 'axios';
 import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
-const username = 'ethanlusby';
+const allUrl = 'http://localhost:3001/all';
+const username = 'avivasofia';
 
 const weekdayName = [
   'Sunday',
@@ -21,7 +22,9 @@ class TikGraph{
     this.root = div;
     this.root.style.display = 'flex';
     this.root.style.flexWrap = 'wrap';
-    axios.post(url, { username }, {timeout: -1})
+    //axios.post(url, { username }, {timeout: -1})
+      //.then(res => this.graphResponse(res.data))
+    axios.get(allUrl, {timeout: -1})
       .then(res => this.graphResponse(res.data))
   }
 

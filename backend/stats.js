@@ -129,7 +129,6 @@ const loadCache = file => {
   }
   catch(err){console.log(err);}
   loadedCache = true;
-  console.log(map);
   for(let u of Object.keys(map))
     console.log(u);
 };
@@ -154,6 +153,15 @@ app.post('/username', (req, res) => {
       res.send(result);
     }
   );
+});
+
+//get all timestamps we have in memory, regardless of user
+app.get('/all', (req, res) => {
+  console.log('get *');
+  const arrays = Object.values(map).map(user => user.data);
+  const final = [].concat(...arrays);
+
+  res.send(final);
 });
 
 app.listen(port, () => console.log(`listening on port ${port}`));
