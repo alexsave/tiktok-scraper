@@ -3,8 +3,20 @@ import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
 const username = 'qzim';
+
+const weekdayName = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'
+];
+
 class TikGraph{
   root;
+
   constructor(div){
     this.root = div;
     axios.post(url, { username })
@@ -13,58 +25,81 @@ class TikGraph{
 
   unixToSeconds = unix => {
     let dt = new Date(unix);
-    return (dt.getSeconds() + 60* dt.getMinutes() + 60*60 *dt.getHours())*1000;
+    let res = (dt.getUTCSeconds() + 60* dt.getUTCMinutes() + 60*60 *dt.getUTCHours())*1000;
+    //this is due to gmt vs est
+    if(res < 5*60*60*1000)
+      res += 24*60*60*1000;
+    return res;
   };
-
-
 
   //we have the data in the browser
   graphResponse = res => {
     console.log(res);
     //first one, let's plot date+time vs likes
+    this.timeline(res);
+
+    //time of day canvas
+    this.timeOfDayGraph(res);
+
+    for(let i = 0; i < 7; i++)
+      this.dayOfWeekGraph(i, res);
+
+  };
+
+  timeline = res => {
     const canvas = document.createElement('canvas');
     this.root.append(canvas);
     let ctx = canvas.getContext('2d');
 
     const likeData = res.map(vid => ({ x: new Date(vid.uploadDate), y: vid.likes }));
-    const commentData = res.map(vid => ({ x: new Date(vid.uploadDate), y: vid.comments }));
 
-    let chart = new Chart(ctx, this.makeConfig(likeData, commentData));
+    new Chart(ctx, this.makeConfig(likeData, config => config));
+  };
 
-    //time of day canvas
-    const todCanvas = document.createElement('canvas');
-    this.root.append(todCanvas);
-    ctx = todCanvas.getContext('2d');
+  timeOfDayGraph = res => {
+    const canvas = document.createElement('canvas');
+    this.root.append(canvas);
+    let ctx = canvas.getContext('2d');
 
-    const likeDataTod = res.map(vid => ({
+    const likeData = res.map(vid => ({
       x: this.unixToSeconds(vid.uploadDate),
       y: vid.likes
     }));
-    const commentDataTod = res.map(vid => ({ x: this.unixToSeconds(vid.uploadDate), y: vid.comments }));
 
-    let todConfig = this.makeConfig(likeDataTod, commentDataTod);
-    //todCanvas.options.scales.xAxes[0].time = {
-      //displayFormats: {}
-    //}
-    chart = new Chart(ctx, this.makeConfig(likeDataTod, commentDataTod));
-
-
-
-
+    let config = this.makeConfig(likeData);
+    config.options.scales.xAxes[0].scaleLabel.labelString = 'time';
+    new Chart(ctx, config);
   };
 
-  makeConfig = (likeData, commentData) => {
+  dayOfWeekGraph = (day, res) => {
+    const filtered = res.filter(vid => new Date(vid.uploadDate).getDay() === day);
+    const likeData = filtered.map(vid => ({
+      x: this.unixToSeconds(vid.uploadDate),
+      y: vid.likes
+    }));
+
+    this.genericGraph(likeData, weekdayName[day]);
+  };
+
+  genericGraph = (likeData, title) => {
+    const canvas = document.createElement('canvas');
+    this.root.append(canvas);
+    let ctx = canvas.getContext('2d');
+
+    const config = this.makeConfig(likeData, config => config);
+    config.options.scales.xAxes[0].scaleLabel.labelString = title;
+
+    new Chart(ctx, config);
+  };
+
+  makeConfig = (likeData) => {
     return {
       type: 'scatter',
       data: {
         datasets: [{
           label: 'likes',
           data: likeData
-        },
-          {
-            label: 'comments',
-            data: commentData
-          }]
+        }]
       },
       options: {
         title: {
