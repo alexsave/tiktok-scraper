@@ -2,7 +2,7 @@ import axios from 'axios';
 import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
-const username = 'qzim';
+const username = 'ethanlusby';
 
 const weekdayName = [
   'Sunday',
@@ -21,7 +21,7 @@ class TikGraph{
     this.root = div;
     this.root.style.display = 'flex';
     this.root.style.flexWrap = 'wrap';
-    axios.post(url, { username })
+    axios.post(url, { username }, {timeout: -1})
       .then(res => this.graphResponse(res.data))
   }
 
@@ -36,7 +36,6 @@ class TikGraph{
 
   //we have the data in the browser
   graphResponse = res => {
-    console.log(res);
     //first one, let's plot date+time vs likes
     this.timeline(res);
 

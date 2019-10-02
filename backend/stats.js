@@ -107,7 +107,7 @@ const getUserData = async (username) => {
   let i = 0;
   for(let url of urls){
     i += 1;
-    console.log(username, i/urls.length*100);
+    console.log(username, (i/urls.length*100).toString().substring(0,5)+'%');
     videoObjects.push(await moreStats(page, url, 500));
   }
 
