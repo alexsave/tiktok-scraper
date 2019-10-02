@@ -82,10 +82,12 @@ const getUserData = async (username, res) => {
   //check the cache
   const cached = map[username];
   if(cached){
-    if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
-    res.send(cached.data);
-    loading[username] = false;
-    return;
+    if(new Date().getTime() - cached.timestamp <= 1000*60*60*24){
+      res.send(cached.data);
+      console.log(`sent ${username}`);
+      loading[username] = false;
+      return;
+    }
   }
 
   // Set up browser and page.
