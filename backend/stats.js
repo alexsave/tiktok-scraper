@@ -24,9 +24,9 @@ const extractItems = () => {
   return items;
 };
 
-const scrollDown = async (page, scrollDelay) => {
+const scrollDown = async (page, scrollDelay, done) => {
   let newHeight, oldHeight = await page.evaluate('document.body.scrollHeight');
-  while(true){
+  while(!done.done){
     await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
     await page.waitFor(1000 + Math.random()*(scrollDelay-1000));
 
@@ -35,6 +35,7 @@ const scrollDown = async (page, scrollDelay) => {
       break;
     oldHeight = newHeight;
   }
+  await (page.browser().close());
 };
 
 /*
@@ -54,12 +55,13 @@ const scrapeScrollItems = async (
  */
 const getScrollVidData = async (page, username, res) => {
   const vidData = {};
+  const done = {done:false};
   await page.setRequestInterception(true);
   console.log('intercepting now');
 
   //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
   page.on('request', request => request.continue());
-  page.on('response', response => responseIntercept(response, vidData, username, page, saveData, res));
+  page.on('response', response => responseIntercept(response, vidData, username, page, saveData, res, done));
   try{
     await page.goto('https://www.tiktok.com/@' + username,{
       waitUntil: 'load', timeout: 0
@@ -67,30 +69,32 @@ const getScrollVidData = async (page, username, res) => {
   }
   catch(err){}
 
-  await scrollDown(page, 1000);
+  await scrollDown(page, 1000, done);
   //await page.waitForResponse(finalResponse);
 
   //await page.setRequestInterception(false);
 };
 
-const saveData = async (data, page, username, res) => {
-  console.log('reached the end');
+const saveData = async (data, page, username, res, done) => {
+  //console.log('reached the end');
   //await page.setRequestInterception(false);
+  done.done = true;
 
   let finalUserData = Object.keys(data).map(key => data[key]);
-  console.log(finalUserData);
+  //console.log(finalUserData);
+  console.log(finalUserData.length);
 
   map[username] = {timestamp: new Date().getTime(), data: finalUserData};
   res.send(finalUserData);
 
-  await (page.browser().close());
+  //await (page.browser().close());
 };
 
 /*
   Some tiktok requests come back in a format that makes it very easy to get video info
   maybe send in callback as a param rather than referencing it as a const
  */
-const responseIntercept = async (response, store, username, page, callback, res) => {
+const responseIntercept = async (response, store, username, page, callback, res, done) => {
   if(!(response.url().startsWith('https://www.tiktok.com/share')))
     return;
   const text = await response.text();
@@ -98,7 +102,7 @@ const responseIntercept = async (response, store, username, page, callback, res)
 
   if(!(json.body.itemListData))
     return;
-  console.log('has item list data');
+  //console.log('has item list data');
     //doneFlag.done = true;
   //console.log(json.body.itemListData);
   json.body.itemListData.forEach(item => {
@@ -113,9 +117,11 @@ const responseIntercept = async (response, store, username, page, callback, res)
     };
   });
 
-  console.log(json.body.hasMore);
-  if(!json.body.hasMore)
-    callback(store, page, username, res);
+  //console.log(json.body.hasMore);
+  if(!json.body.hasMore){
+    callback(store, page, username, res, done);
+
+  }
 
 };
 
@@ -144,16 +150,16 @@ const getUserData = async (username, res) => {
   loading[username] = true;
   //check the cache
   const cached = map[username];
-  if(cached){
+  /*if(cached){
     //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
     //return cached.data;
     res.send(cached.data);
     return;
-  }
+  }*/
 
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    headless: false,
+    //headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
