@@ -60,9 +60,12 @@ const getScrollVidData = async (page, username, res) => {
   //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
   page.on('request', request => request.continue());
   page.on('response', response => responseIntercept(response, vidData, username, page, saveData, res));
-  await page.goto('https://www.tiktok.com/@' + username,{
-    waitUntil: 'load', timeout: 0
-  });
+  try{
+    await page.goto('https://www.tiktok.com/@' + username,{
+      waitUntil: 'load', timeout: 0
+    });
+  }
+  catch(err){}
 
   await scrollDown(page, 1000);
   //await page.waitForResponse(finalResponse);
@@ -71,7 +74,8 @@ const getScrollVidData = async (page, username, res) => {
 };
 
 const saveData = async (data, page, username, res) => {
-  await page.setRequestInterception(false);
+  console.log('reached the end');
+  //await page.setRequestInterception(false);
 
   let finalUserData = Object.keys(data).map(key => data[key]);
   console.log(finalUserData);
@@ -79,11 +83,12 @@ const saveData = async (data, page, username, res) => {
   map[username] = {timestamp: new Date().getTime(), data: finalUserData};
   res.send(finalUserData);
 
-  await page.browser().close();
+  await (page.browser().close());
 };
 
 /*
   Some tiktok requests come back in a format that makes it very easy to get video info
+  maybe send in callback as a param rather than referencing it as a const
  */
 const responseIntercept = async (response, store, username, page, callback, res) => {
   if(!(response.url().startsWith('https://www.tiktok.com/share')))
@@ -93,7 +98,7 @@ const responseIntercept = async (response, store, username, page, callback, res)
 
   if(!(json.body.itemListData))
     return;
-  console.log('waht the fuck');
+  console.log('has item list data');
     //doneFlag.done = true;
   //console.log(json.body.itemListData);
   json.body.itemListData.forEach(item => {
@@ -143,6 +148,7 @@ const getUserData = async (username, res) => {
     //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
     //return cached.data;
     res.send(cached.data);
+    return;
   }
 
   // Set up browser and page.
@@ -159,7 +165,7 @@ const getUserData = async (username, res) => {
     waitUntil: 'load', timeout: 0
   });*/
 
-  /*let vo = */ await getScrollVidData(page, username);
+  /*let vo = */ await getScrollVidData(page, username, res);
   //console.log(vo);
   //map[username] = {timestamp: new Date().getTime(), data: vo};
   return;
