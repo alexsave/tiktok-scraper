@@ -3,7 +3,7 @@ import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
 const allUrl = 'http://localhost:3001/all';
-const username = 'geminiofficial';
+const username = 'garyvee';
 
 const weekdayName = [
   'Sunday',

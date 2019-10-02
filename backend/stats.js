@@ -63,7 +63,7 @@ const moreStats = async (page, url, statsDelay) => {
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
-  await page.waitFor(100);
+  await page.waitFor(100 + Math.random()*(statsDelay-100));
 
   const videoObject = await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
 
@@ -108,7 +108,16 @@ const getUserData = async (username) => {
   for(let url of urls){
     i += 1;
     console.log(username, (i/urls.length*100).toString().substring(0,5)+'%');
-    videoObjects.push(await moreStats(page, url, 500));
+    let obj;
+    try{
+      obj = await moreStats(page, url, 600)
+    }
+    //sometimes tiktok says no more, so just save what we have
+    catch(err){
+      console.log(username, 'aborting and saving');
+      break;
+    }
+    videoObjects.push(obj);
   }
 
   //map.push(
