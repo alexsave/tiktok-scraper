@@ -19,6 +19,8 @@ class TikGraph{
 
   constructor(div){
     this.root = div;
+    this.root.style.display = 'flex';
+    this.root.style.flexWrap = 'wrap';
     axios.post(url, { username })
       .then(res => this.graphResponse(res.data))
   }
@@ -71,8 +73,12 @@ class TikGraph{
   };
 
   genericGraph = (likeData, title) => {
+    const container = document.createElement('div');
+    container.style.height = '500px';
+    container.style.width = '1000px';
     const canvas = document.createElement('canvas');
-    this.root.append(canvas);
+    container.append(canvas);
+    this.root.append(container);
     let ctx = canvas.getContext('2d');
 
     const config = this.makeConfig(likeData);
