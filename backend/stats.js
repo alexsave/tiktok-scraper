@@ -26,16 +26,16 @@ const extractItems = () => {
 
 const scrollDown = async (page, scrollDelay, done) => {
   let newHeight, oldHeight = await page.evaluate('document.body.scrollHeight');
-  while(!done.done){
+  while(!(done.done)){
     await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
     await page.waitFor(1000 + Math.random()*(scrollDelay-1000));
 
-    newHeight = await page.evaluate('document.body.scrollHeight');
-    if(oldHeight >= newHeight)
-      break;
-    oldHeight = newHeight;
+    //newHeight = await page.evaluate('document.body.scrollHeight');
+    //if(oldHeight >= newHeight)
+      //break;
+    //oldHeight = newHeight;
   }
-  await (page.browser().close());
+  await page.browser().close();
 };
 
 /*
@@ -61,13 +61,18 @@ const getScrollVidData = async (page, username, res) => {
 
   //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
   page.on('request', request => request.continue());
-  page.on('response', response => responseIntercept(response, vidData, username, page, saveData, res, done));
-  try{
-    await page.goto('https://www.tiktok.com/@' + username,{
-      waitUntil: 'load', timeout: 0
-    });
-  }
-  catch(err){}
+  page.on('response', response => responseIntercept(response, vidData, username, () => {
+    done.done = true;
+    const finalUserData = Object.keys(vidData).map(key => vidData[key]);
+    console.log(finalUserData.length);
+    map[username] = {timestamp: new Date().getTime(), data: finalUserData};
+    res.send(finalUserData);
+    loading[username] = false;
+  }));
+
+  await page.goto('https://www.tiktok.com/@' + username,{
+    waitUntil: 'load', timeout: 0
+  });
 
   await scrollDown(page, 1000, done);
   //await page.waitForResponse(finalResponse);
@@ -85,6 +90,7 @@ const saveData = async (data, page, username, res, done) => {
   console.log(finalUserData.length);
 
   map[username] = {timestamp: new Date().getTime(), data: finalUserData};
+  loading[username] = false;
   res.send(finalUserData);
 
   //await (page.browser().close());
@@ -93,8 +99,9 @@ const saveData = async (data, page, username, res, done) => {
 /*
   Some tiktok requests come back in a format that makes it very easy to get video info
   maybe send in callback as a param rather than referencing it as a const
+  the callback is for when we're done, and tiktok will actually tell us
  */
-const responseIntercept = async (response, store, username, page, callback, res, done) => {
+const responseIntercept = async (response, store, username, callback) => {
   if(!(response.url().startsWith('https://www.tiktok.com/share')))
     return;
   const text = await response.text();
@@ -103,7 +110,7 @@ const responseIntercept = async (response, store, username, page, callback, res,
   if(!(json.body.itemListData))
     return;
   //console.log('has item list data');
-    //doneFlag.done = true;
+  //doneFlag.done = true;
   //console.log(json.body.itemListData);
   json.body.itemListData.forEach(item => {
     const {id, text, createTime, diggCount, shareCount, commentCount} = item.itemInfos;
@@ -118,11 +125,8 @@ const responseIntercept = async (response, store, username, page, callback, res,
   });
 
   //console.log(json.body.hasMore);
-  if(!json.body.hasMore){
-    callback(store, page, username, res, done);
-
-  }
-
+  if(!json.body.hasMore)
+    callback();
 };
 
 
@@ -159,7 +163,7 @@ const getUserData = async (username, res) => {
 
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    //headless: false,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -232,11 +236,12 @@ app.post('/username', (req, res) => {
   }
   loading[username] = true;
   //cosider passing res to the get userdata
-  getUserData(username, res).then(result =>{
-      loading[username] = false;
-      res.send(result);
-    }
-  );
+  getUserData(username, res);
+  /*.then(result =>{
+    loading[username] = false;
+    res.send(result);
+  }
+);*/
 });
 
 //get all timestamps we have in memory, regardless of user
