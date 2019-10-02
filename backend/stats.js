@@ -16,38 +16,12 @@ const loading = {};
 let map = {};
 const FILE = './stats.json';
 
-const extractItems = () => {
-  const extractedElements = document.querySelectorAll('._video_feed_item a');
-  const items = [];
-  for (let element of extractedElements)
-    items.push(element.href);
-  return items;
-};
-
 const scrollDown = async (page, scrollDelay, done) => {
-  let newHeight, oldHeight = await page.evaluate('document.body.scrollHeight');
-  while(!(done.done)){
+  while(done.done === false){
     await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
-    await page.waitFor(1000 + Math.random()*(scrollDelay-1000));
-
-    //newHeight = await page.evaluate('document.body.scrollHeight');
-    //if(oldHeight >= newHeight)
-      //break;
-    //oldHeight = newHeight;
+    await page.waitFor(2000);
   }
   await page.browser().close();
-};
-
-/*
-  Scroll down and use a function to get all video urls
- */
-const scrapeScrollItems = async (
-  page,
-  extractItems,
-  scrollDelay = 1000,
-) => {
-  await scrollDown(page, scrollDelay);
-  return await page.evaluate(extractItems);
 };
 
 /*
@@ -57,9 +31,7 @@ const getScrollVidData = async (page, username, res) => {
   const vidData = {};
   const done = {done:false};
   await page.setRequestInterception(true);
-  console.log('intercepting now');
 
-  //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
   page.on('request', request => request.continue());
   page.on('response', response => responseIntercept(response, vidData, username, () => {
     done.done = true;
@@ -70,30 +42,9 @@ const getScrollVidData = async (page, username, res) => {
     loading[username] = false;
   }));
 
-  await page.goto('https://www.tiktok.com/@' + username,{
-    waitUntil: 'load', timeout: 0
-  });
+  await page.goto(`https://www.tiktok.com/@${username}`, {timeout: 0});
 
   await scrollDown(page, 1000, done);
-  //await page.waitForResponse(finalResponse);
-
-  //await page.setRequestInterception(false);
-};
-
-const saveData = async (data, page, username, res, done) => {
-  //console.log('reached the end');
-  //await page.setRequestInterception(false);
-  done.done = true;
-
-  let finalUserData = Object.keys(data).map(key => data[key]);
-  //console.log(finalUserData);
-  console.log(finalUserData.length);
-
-  map[username] = {timestamp: new Date().getTime(), data: finalUserData};
-  loading[username] = false;
-  res.send(finalUserData);
-
-  //await (page.browser().close());
 };
 
 /*
@@ -109,13 +60,11 @@ const responseIntercept = async (response, store, username, callback) => {
 
   if(!(json.body.itemListData))
     return;
-  //console.log('has item list data');
-  //doneFlag.done = true;
-  //console.log(json.body.itemListData);
+
   json.body.itemListData.forEach(item => {
     const {id, text, createTime, diggCount, shareCount, commentCount} = item.itemInfos;
     store[id] = {
-      url: 'https://www.tiktok.com/@' + username + '/video/' + id,
+      url: `https://www.tiktok.com/@${username}/video/${id}`,
       uploadDate: createTime,
       likes: parseInt(diggCount),
       comments: parseInt(commentCount),
@@ -124,30 +73,8 @@ const responseIntercept = async (response, store, username, callback) => {
     };
   });
 
-  //console.log(json.body.hasMore);
   if(!json.body.hasMore)
     callback();
-};
-
-
-/*
-  Tiktok videos have timestamps on the video page if you look closely
- */
-const moreStats = async (page, url, statsDelay) => {
-  await page.goto(url, {
-    waitUntil: 'load', timeout: 0
-  });
-  await page.waitFor(100 + Math.random()*(statsDelay-100));
-
-  const videoObject = await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
-
-  return {
-    url,
-    uploadDate: new Date(videoObject.uploadDate).getTime(),
-    likes: parseInt(videoObject.interactionCount),
-    comments: parseInt(videoObject.commentCount),
-    title: videoObject.name
-  };
 };
 
 const getUserData = async (username, res) => {
@@ -170,43 +97,7 @@ const getUserData = async (username, res) => {
   await page.setUserAgent('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0');
   await page.setViewport({width: 1280, height: 926});
 
-  // Navigate to the demo page.
-  /*await page.goto('https://tiktok.com/@' + username,{
-    waitUntil: 'load', timeout: 0
-  });*/
-
-  /*let vo = */ await getScrollVidData(page, username, res);
-  //console.log(vo);
-  //map[username] = {timestamp: new Date().getTime(), data: vo};
-  return;
-
-  // Scroll and extract items from the page.
-  let urls = await scrapeScrollItems(page, extractItems);
-  urls = urls.reverse();
-
-  let videoObjects = [];
-  //urls.map(url => await moreStats(page, url));
-  let i = 0;
-  for(let url of urls){
-    i += 1;
-    console.log(username, (i/urls.length*100).toString().substring(0,5)+'%');
-    let obj;
-    try{
-      obj = await moreStats(page, url, 300 + urls.length);
-    }
-      //sometimes tiktok says no more, so just save what we have
-    catch(err){
-      console.log(username, 'aborting and saving');
-      break;
-    }
-    videoObjects.push(obj);
-  }
-
-  map[username] = {timestamp: new Date().getTime(), data: videoObjects};
-
-  // Close the browser.
-  await browser.close();
-  return videoObjects;
+  getScrollVidData(page, username, res);
 };
 
 const loadCache = file => {
@@ -254,6 +145,5 @@ app.get('/all', (req, res) => {
 });
 
 app.listen(port, () => console.log(`listening on port ${port}`));
-
 
 process.stdin.resume();
