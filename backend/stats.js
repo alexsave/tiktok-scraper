@@ -43,15 +43,11 @@ const scrollDown = async (page, scrollDelay) => {
 const scrapeScrollItems = async (
   page,
   extractItems,
-  minItemCount,
   scrollDelay = 1000,
 ) => {
   let items = [];
-  do{
-    await scrollDown(page, scrollDelay);
-    items = await page.evaluate(extractItems);
-  }
-  while (items.length < minItemCount);
+  await scrollDown(page, scrollDelay);
+  items = await page.evaluate(extractItems);
 
   return items;
 };
@@ -99,7 +95,7 @@ const getUserData = async (username) => {
   });
 
   // Scroll and extract items from the page.
-  let urls = await scrapeScrollItems(page, extractItems, 0);
+  let urls = await scrapeScrollItems(page, extractItems);
   urls = urls.reverse();
 
   let videoObjects = [];
@@ -110,9 +106,9 @@ const getUserData = async (username) => {
     console.log(username, (i/urls.length*100).toString().substring(0,5)+'%');
     let obj;
     try{
-      obj = await moreStats(page, url, 600)
+      obj = await moreStats(page, url, 300 + urls.length);
     }
-    //sometimes tiktok says no more, so just save what we have
+      //sometimes tiktok says no more, so just save what we have
     catch(err){
       console.log(username, 'aborting and saving');
       break;
@@ -120,11 +116,7 @@ const getUserData = async (username) => {
     videoObjects.push(obj);
   }
 
-  //map.push(
   map[username] = {timestamp: new Date().getTime(), data: videoObjects};
-
-  //save that shit
-  //fs.writeFile(FILE, JSON.stringify(map), err => {});
 
   // Close the browser.
   await browser.close();
