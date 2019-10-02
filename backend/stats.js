@@ -45,12 +45,76 @@ const scrapeScrollItems = async (
   extractItems,
   scrollDelay = 1000,
 ) => {
-  let items = [];
   await scrollDown(page, scrollDelay);
-  items = await page.evaluate(extractItems);
-
-  return items;
+  return await page.evaluate(extractItems);
 };
+
+/*
+  Let's just intercept the requests
+ */
+const getScrollVidData = async (page, username) => {
+  let vidData = {};
+  await page.setRequestInterception(true);
+  console.log('intercepting now');
+
+  //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
+  page.on('response', response => responseIntercept(response, vidData, username, page, saveData));
+
+  await scrollDown(page, 1000);
+  //await page.waitForResponse(finalResponse);
+
+  //await page.setRequestInterception(false);
+};
+
+const saveData = async (data, page, username) => {
+  await page.setRequestInterception(false);
+
+  let finalUserData = Object.keys(data).map(key => data[key]);
+  console.log(finalUserData);
+
+  //map[username] = {timestamp: new Date().getTime(), data: finalUserData};
+};
+
+const finalResponse = async response => {
+  if(response.url().startsWith('https://www.tiktok.com/share')){
+    let body = JSON.parse(await response.text()).body;
+    if(body.itemListData && body.hasMore === false)
+      return true;
+  }
+  return false;
+};
+/*
+  Some tiktok requests come back in a format that makes it very easy to get video info
+ */
+const responseIntercept = async (response, store, username, page, callback) => {
+  if(!(response.url().startsWith('https://www.tiktok.com/share')))
+    return;
+  const text = await response.text();
+  const json = JSON.parse(text);
+
+  if(!(json.body.itemListData))
+    return;
+  console.log('waht the fuck');
+    //doneFlag.done = true;
+  //console.log(json.body.itemListData);
+  json.body.itemListData.forEach(item => {
+    const {id, text, createTime, diggCount, shareCount, commentCount} = item.itemInfos;
+    store[id] = {
+      url: 'https://www.tiktok.com/@' + username + '/video/' + id,
+      uploadDate: createTime,
+      likes: parseInt(diggCount),
+      comments: parseInt(commentCount),
+      shareCount: parseInt(shareCount),
+      title: text
+    };
+  });
+
+  console.log(json.body.hasMore);
+  if(!json.body.hasMore)
+    callback(store, page, username);
+
+};
+
 
 /*
   Tiktok videos have timestamps on the video page if you look closely
@@ -78,12 +142,12 @@ const getUserData = async (username) => {
   const cached = map[username];
   if(cached){
     //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
-      return cached.data;
+    return cached.data;
   }
 
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    //headless: false,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -93,6 +157,11 @@ const getUserData = async (username) => {
   await page.goto('https://tiktok.com/@' + username,{
     waitUntil: 'load', timeout: 0
   });
+
+  let vo = await getScrollVidData(page, username);
+  //console.log(vo);
+  //map[username] = {timestamp: new Date().getTime(), data: vo};
+  return;
 
   // Scroll and extract items from the page.
   let urls = await scrapeScrollItems(page, extractItems);
@@ -149,6 +218,7 @@ app.post('/username', (req, res) => {
     return;
   }
   loading[username] = true;
+  //cosider passing res to the get userdata
   getUserData(username).then(result =>{
       loading[username] = false;
       res.send(result);
