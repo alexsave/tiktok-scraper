@@ -47,28 +47,17 @@ class TikGraph{
   };
 
   timeline = res => {
-    const canvas = document.createElement('canvas');
-    this.root.append(canvas);
-    let ctx = canvas.getContext('2d');
-
     const likeData = res.map(vid => ({ x: new Date(vid.uploadDate), y: vid.likes }));
-
-    new Chart(ctx, this.makeConfig(likeData, config => config));
+    this.genericGraph(likeData, 'date');
   };
 
   timeOfDayGraph = res => {
-    const canvas = document.createElement('canvas');
-    this.root.append(canvas);
-    let ctx = canvas.getContext('2d');
-
     const likeData = res.map(vid => ({
       x: this.unixToSeconds(vid.uploadDate),
       y: vid.likes
     }));
 
-    let config = this.makeConfig(likeData);
-    config.options.scales.xAxes[0].scaleLabel.labelString = 'time';
-    new Chart(ctx, config);
+    this.genericGraph(likeData, 'time');
   };
 
   dayOfWeekGraph = (day, res) => {
@@ -86,7 +75,7 @@ class TikGraph{
     this.root.append(canvas);
     let ctx = canvas.getContext('2d');
 
-    const config = this.makeConfig(likeData, config => config);
+    const config = this.makeConfig(likeData);
     config.options.scales.xAxes[0].scaleLabel.labelString = title;
 
     new Chart(ctx, config);
