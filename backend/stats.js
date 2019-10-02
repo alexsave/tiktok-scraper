@@ -83,7 +83,6 @@ const getUserData = async (username, res) => {
   const cached = map[username];
   /*if(cached){
     //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
-    //return cached.data;
     res.send(cached.data);
     return;
   }*/
@@ -114,7 +113,7 @@ const loadCache = file => {
 loadCache(FILE);
 
 //now begins the server part
-//consider moving everythign above
+//consider moving everything above
 app.use(cors());
 app.use(express.json());
 
@@ -126,13 +125,8 @@ app.post('/username', (req, res) => {
     return;
   }
   loading[username] = true;
-  //cosider passing res to the get userdata
+
   getUserData(username, res);
-  /*.then(result =>{
-    loading[username] = false;
-    res.send(result);
-  }
-);*/
 });
 
 //get all timestamps we have in memory, regardless of user
