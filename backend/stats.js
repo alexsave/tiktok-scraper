@@ -81,11 +81,12 @@ const getUserData = async (username, res) => {
   loading[username] = true;
   //check the cache
   const cached = map[username];
-  /*if(cached){
-    //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
+  if(cached){
+    if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
     res.send(cached.data);
+    loading[username] = false;
     return;
-  }*/
+  }
 
   // Set up browser and page.
   const browser = await puppeteer.launch({
@@ -104,7 +105,7 @@ const loadCache = file => {
     let raw = fs.readFileSync(file);
     map = JSON.parse(raw.toString());
   }
-  catch(err){console.log(err);}
+  catch(err){};
   loadedCache = true;
   for(let u of Object.keys(map))
     console.log(u);
