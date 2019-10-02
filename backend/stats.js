@@ -52,13 +52,17 @@ const scrapeScrollItems = async (
 /*
   Let's just intercept the requests
  */
-const getScrollVidData = async (page, username) => {
-  let vidData = {};
+const getScrollVidData = async (page, username, res) => {
+  const vidData = {};
   await page.setRequestInterception(true);
   console.log('intercepting now');
 
   //let p = new Promise(function(p1: (value?: (PromiseLike<T> | T)) => void,p2: (reason?: any) => void){});
-  page.on('response', response => responseIntercept(response, vidData, username, page, saveData));
+  page.on('request', request => request.continue());
+  page.on('response', response => responseIntercept(response, vidData, username, page, saveData, res));
+  await page.goto('https://www.tiktok.com/@' + username,{
+    waitUntil: 'load', timeout: 0
+  });
 
   await scrollDown(page, 1000);
   //await page.waitForResponse(finalResponse);
@@ -66,27 +70,22 @@ const getScrollVidData = async (page, username) => {
   //await page.setRequestInterception(false);
 };
 
-const saveData = async (data, page, username) => {
+const saveData = async (data, page, username, res) => {
   await page.setRequestInterception(false);
 
   let finalUserData = Object.keys(data).map(key => data[key]);
   console.log(finalUserData);
 
-  //map[username] = {timestamp: new Date().getTime(), data: finalUserData};
+  map[username] = {timestamp: new Date().getTime(), data: finalUserData};
+  res.send(finalUserData);
+
+  await page.browser().close();
 };
 
-const finalResponse = async response => {
-  if(response.url().startsWith('https://www.tiktok.com/share')){
-    let body = JSON.parse(await response.text()).body;
-    if(body.itemListData && body.hasMore === false)
-      return true;
-  }
-  return false;
-};
 /*
   Some tiktok requests come back in a format that makes it very easy to get video info
  */
-const responseIntercept = async (response, store, username, page, callback) => {
+const responseIntercept = async (response, store, username, page, callback, res) => {
   if(!(response.url().startsWith('https://www.tiktok.com/share')))
     return;
   const text = await response.text();
@@ -111,7 +110,7 @@ const responseIntercept = async (response, store, username, page, callback) => {
 
   console.log(json.body.hasMore);
   if(!json.body.hasMore)
-    callback(store, page, username);
+    callback(store, page, username, res);
 
 };
 
@@ -136,13 +135,14 @@ const moreStats = async (page, url, statsDelay) => {
   };
 };
 
-const getUserData = async (username) => {
+const getUserData = async (username, res) => {
   loading[username] = true;
   //check the cache
   const cached = map[username];
   if(cached){
     //if(new Date().getTime() - cached.timestamp <= 1000*60*60*24)
-    return cached.data;
+    //return cached.data;
+    res.send(cached.data);
   }
 
   // Set up browser and page.
@@ -151,14 +151,15 @@ const getUserData = async (username) => {
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
+  await page.setUserAgent('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0');
   await page.setViewport({width: 1280, height: 926});
 
   // Navigate to the demo page.
-  await page.goto('https://tiktok.com/@' + username,{
+  /*await page.goto('https://tiktok.com/@' + username,{
     waitUntil: 'load', timeout: 0
-  });
+  });*/
 
-  let vo = await getScrollVidData(page, username);
+  /*let vo = */ await getScrollVidData(page, username);
   //console.log(vo);
   //map[username] = {timestamp: new Date().getTime(), data: vo};
   return;
@@ -219,7 +220,7 @@ app.post('/username', (req, res) => {
   }
   loading[username] = true;
   //cosider passing res to the get userdata
-  getUserData(username).then(result =>{
+  getUserData(username, res).then(result =>{
       loading[username] = false;
       res.send(result);
     }
