@@ -3,7 +3,7 @@ import Chart from 'chart.js';
 
 const url = 'http://localhost:3001/username';
 const allUrl = 'http://localhost:3001/all';
-const username = 'avivasofia';
+const username = 'geminiofficial';
 
 const weekdayName = [
   'Sunday',
@@ -22,10 +22,12 @@ class TikGraph{
     this.root = div;
     this.root.style.display = 'flex';
     this.root.style.flexWrap = 'wrap';
-    //axios.post(url, { username }, {timeout: -1})
-      //.then(res => this.graphResponse(res.data))
-    axios.get(allUrl, {timeout: -1})
-      .then(res => this.graphResponse(res.data))
+    if(username === '*')
+      axios.get(allUrl, {timeout: -1})
+        .then(res => this.graphResponse(res.data));
+    else
+      axios.post(url, { username }, {timeout: -1})
+        .then(res => this.graphResponse(res.data));
   }
 
   unixToSeconds = unix => {

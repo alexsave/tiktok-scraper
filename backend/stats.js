@@ -63,7 +63,7 @@ const moreStats = async (page, url, statsDelay) => {
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
-  await page.waitFor(100 + Math.random()*(statsDelay-100));
+  await page.waitFor(100);
 
   const videoObject = await page.evaluate(() => JSON.parse(document.getElementById('videoObject').innerText));
 
