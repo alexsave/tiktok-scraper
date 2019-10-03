@@ -13,6 +13,19 @@ const unixToSeconds = unix => {
     res += 24*60*60*1000;
   return res;
 };
+const pointStyle = {
+  fill: false,
+  backgroundColor: '#FF0000',
+  pointBorderColor: '#FF0000',
+  pointBackgroundColor: 'FFAAAAA',
+  pointBorderWidth: 1,
+  pointHoverRadius: 5,
+  pointHoverBackgroundColor: '#FF0000',
+  pointHoverBorderColor: '#AAAAAA',
+  pointHoverBorderWidth: 2,
+  pointRadius: 2,
+  pointHitRadius: 9
+};
 
 /*const data = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -59,19 +72,7 @@ class BaseGraph extends Component{
             //the options are really dumb, don't worry too much about them
             return <Scatter
               data={{
-                datasets:[{label: 'likes', data:data,
-                  fill: false,
-                  backgroundColor: '#FF0000',
-                  pointBorderColor: '#FF0000',
-                  pointBackgroundColor: 'FFAAAAA',
-                  pointBorderWidth: 1,
-                  pointHoverRadius: 5,
-                  pointHoverBackgroundColor: '#FF0000',
-                  pointHoverBorderColor: '#AAAAAA',
-                  pointHoverBorderWidth: 2,
-                  pointRadius: 2,
-                  pointHitRadius: 9
-                }]
+                datasets:[{...pointStyle, label: 'likes', data:data}]
               }}
               options={{ scales: {xAxes:[{type:'time', scaleLabel:{display:true, labelString:this.state.xTitle}}]} }}
             />;
