@@ -19,7 +19,8 @@ export class Data extends Component{
     this.state = {
       all: {},
       data: [],
-      cutoff: 100
+      minLikes: 100,
+      timeIncrement: 'h'
     };
     this.fetchData('qzim');
   }
@@ -46,13 +47,27 @@ export class Data extends Component{
     this.manipulationPipeline(res.data);
   };
 
-  cutoff = data => data.filter(vid => vid.likes >= this.state.cutoff);
+  cutoff = data => data.filter(vid => vid.likes >= this.state.minLikes);
+
+  toIncrement = data => /*{
+    return*/ data.map(vid => {
+      const time = new Date(vid.uploadDate);
+      if(this.state.timeIncrement !== 's')
+        time.setSeconds(time.getSeconds() >= 30? 60: 0);
+      if(this.state.timeIncrement === 'h')
+        time.setMinutes(time.getMinutes() >= 30? 60: 0);
+      return {...vid, uploadDate: time.getTime()};
+    })/*;
+  }*/;
+
+
 
   manipulationPipeline = data => {
     const cut = this.cutoff(data);
-    this.setState({data: cut});
+    const incremented = this.toIncrement(cut);
+    console.log(incremented);
+    this.setState({data: incremented});
   };
-
 
   render() {
     const {children} = this.props;
