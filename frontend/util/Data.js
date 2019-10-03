@@ -20,7 +20,8 @@ export class Data extends Component{
       all: {},
       data: [],
       minLikes: 100,
-      timeIncrement: 'h'
+      timeIncrement: 'h',
+      transform: 'avg'
     };
     this.fetchData('qzim');
   }
@@ -49,7 +50,7 @@ export class Data extends Component{
 
   cutoff = data => data.filter(vid => vid.likes >= this.state.minLikes);
 
-  toIncrement = data => /*{
+  roundTime = data => /*{
     return*/ data.map(vid => {
       const time = new Date(vid.uploadDate);
       if(this.state.timeIncrement !== 's')
@@ -60,13 +61,31 @@ export class Data extends Component{
     })/*;
   }*/;
 
+  //averaging out will combine videos, thus losing invididual video information
+  //be careul
+  transform = data => {
+    if(this.state.transform !== 'avg')
+      return data;
 
+    const timeLikes = {};
+    data.forEach(vid => {
+      if(!timeLikes[vid.uploadDate])
+        timeLikes[vid.uploadDate] = [];
+      timeLikes[vid.uploadDate].push(vid.likes);
+    });
+
+    return Object.keys(timeLikes).map(time => ({
+      uploadDate: time,
+      likes: timeLikes[time].reduce((a,b) => a+b, 0)/timeLikes[time].length
+    }));
+  };
 
   manipulationPipeline = data => {
     const cut = this.cutoff(data);
-    const incremented = this.toIncrement(cut);
-    console.log(incremented);
-    this.setState({data: incremented});
+    const rounded = this.roundTime(cut);
+    //const transformed = this.transform(rounded);
+    //console.log(transformed);
+    this.setState({data: rounded});
   };
 
   render() {
