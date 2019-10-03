@@ -19,7 +19,6 @@ export const UnixToSecondsOfWeek = unix => {
   return now.getTime();
 };
 
-
 export const WeekdayName = [
   'Sunday',
   'Monday',
