@@ -10,12 +10,15 @@ export class Data extends Component{
   constructor(props){
     super(props);
 
+    //this will keep yet another map of username => data
     this.state = {
-      username: 'test'
+      username: 'test',
+      map: {},
+      data: {}
     };
   }
 
-  updateData = username => {
+  fetchData = username => {
     console.log(username);
     this.setState({username: username});
   };
@@ -26,7 +29,7 @@ export class Data extends Component{
     return (
       <DataContext.Provider
         value={{
-          updateData: this.updateData,
+          fetchData: this.fetchData,
           getData: this.state.data
         }}
       >
