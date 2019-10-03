@@ -13,6 +13,7 @@ module.exports = {
     publicPath: '/',
     hot: true
   },
+  devtool: 'eval-source-map',
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
