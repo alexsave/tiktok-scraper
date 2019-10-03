@@ -39,6 +39,9 @@ class BaseGraph extends Component{
       <div>
         <div style={{width: '1000px', height: '500px'}}>
           <Line data={data} />
+          <DataConsumer>
+            {context => context.getData + ' '}
+          </DataConsumer>
         </div>
       </div>
 

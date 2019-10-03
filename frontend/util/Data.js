@@ -1,6 +1,10 @@
 import axios from 'axios';
 import React, {Component} from 'react';
 
+//consider using sockets, as these requests can take a while
+const url = 'http://localhost:3001/username';
+const allUrl = 'http://localhost:3001/all';
+
 export const DataContext = React.createContext({});
 
 /**
@@ -11,9 +15,10 @@ export class Data extends Component{
     super(props);
 
     //this will keep yet another map of username => data
+    //data is the current shit
     this.state = {
       username: 'test',
-      map: {},
+      all: {},
       data: {}
     };
   }
@@ -21,6 +26,21 @@ export class Data extends Component{
   fetchData = username => {
     console.log(username);
     this.setState({username: username});
+    if(this.state.map[username])
+      this.setState(state => ({data: state.all[username]}));
+
+    if(username === '*')
+      axios.get(allUrl, {timeout: -1})
+        .then(res => {
+          this.state.all[username] = res;
+          this.setState({data: res});
+        });
+    else
+      axios.post(url, { username }, {timeout: -1})
+        .then(res => {
+          this.state.all[username] = res;
+          this.setState({data: res});
+        });
   };
 
   render() {

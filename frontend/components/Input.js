@@ -14,7 +14,7 @@ class Input extends Component{
     return <div>
       <input onChange={e => this.setState({username: e.target.value})}/>
       <DataConsumer>
-        { context => <button onClick={() => context.fetchData(this.state.username)}/> }
+        {context => <button onClick={() => context.fetchData(this.state.username)}/>}
       </DataConsumer>
     </div>
   };
