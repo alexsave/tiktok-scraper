@@ -1,8 +1,8 @@
-import TikGraph from "./graph";
+import App from "./App";
 import ReactDOM from 'react-dom';
 import React from "react";
 
-ReactDOM.render(<div/>, document.querySelector('#root'));
+ReactDOM.render(<App/>, document.querySelector('#root'));
 
 if(module.hot)
   module.hot.accept();
