@@ -17,29 +17,26 @@ export class Data extends Component{
     //this will keep yet another map of username => data
     //data is the current shit
     this.state = {
-      username: 'test',
       all: {},
       data: {}
     };
   }
 
   fetchData = username => {
-    console.log(username);
-    this.setState({username: username});
-    if(this.state.map[username])
+    if(this.state.all[username])
       this.setState(state => ({data: state.all[username]}));
 
     if(username === '*')
       axios.get(allUrl, {timeout: -1})
         .then(res => {
-          this.state.all[username] = res;
-          this.setState({data: res});
+          this.state.all[username] = res.data;
+          this.setState({data: res.data});
         });
     else
       axios.post(url, { username }, {timeout: -1})
         .then(res => {
-          this.state.all[username] = res;
-          this.setState({data: res});
+          this.state.all[username] = res.data;
+          this.setState({data: res.data});
         });
   };
 
@@ -61,11 +58,7 @@ export class Data extends Component{
 
 export const DataConsumer = DataContext.Consumer;
 
-const url = 'http://localhost:3001/username';
-const allUrl = 'http://localhost:3001/all';
-const username = 'qzim';
-
-const weekdayName = [
+/*const weekdayName = [
   'Sunday',
   'Monday',
   'Tuesday',
@@ -187,4 +180,4 @@ class DataProvider{
 
 }
 
-export default DataProvider;
+export default DataProvider;*/

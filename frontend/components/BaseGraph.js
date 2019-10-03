@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {Line} from 'react-chartjs-2';
-import DataProvider, {DataConsumer} from "../util/Data";
+import {DataConsumer} from "../util/Data";
 
 const data = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
