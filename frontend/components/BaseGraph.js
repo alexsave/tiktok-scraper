@@ -58,7 +58,21 @@ class BaseGraph extends Component{
             let data = context.getData.map(this.state.filter);
             //the options are really dumb, don't worry too much about them
             return <Scatter
-              data={{ datasets:[{label: 'likes', data:data}] }}
+              data={{
+                datasets:[{label: 'likes', data:data,
+                  fill: false,
+                  backgroundColor: '#FF0000',
+                  pointBorderColor: '#FF0000',
+                  pointBackgroundColor: 'FFAAAAA',
+                  pointBorderWidth: 1,
+                  pointHoverRadius: 5,
+                  pointHoverBackgroundColor: '#FF0000',
+                  pointHoverBorderColor: '#AAAAAA',
+                  pointHoverBorderWidth: 2,
+                  pointRadius: 2,
+                  pointHitRadius: 9
+                }]
+              }}
               options={{ scales: {xAxes:[{type:'time', scaleLabel:{display:true, labelString:this.state.xTitle}}]} }}
             />;
           }}
