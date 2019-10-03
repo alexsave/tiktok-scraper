@@ -21,7 +21,7 @@ export class Data extends Component{
       data: [],
       minLikes: 100,
       timeIncrement: 'h',
-      transform: 'avg'
+      transformType: 'avg'
     };
     this.fetchData('qzim');
   }
@@ -47,7 +47,7 @@ export class Data extends Component{
     this.manipulationPipeline(res.data);
   };
 
-  cutoff = data => data.filter(vid => vid.likes >= this.state.minLikes);
+  cut = data => data.filter(vid => vid.likes >= this.state.minLikes);
 
   roundTime = data => data.map(vid => {
     const time = new Date(vid.uploadDate);
@@ -59,8 +59,8 @@ export class Data extends Component{
   });
 
   manipulationPipeline = data => {
-    const cut = this.cutoff(data);
-    const rounded = this.roundTime(cut);
+    const cutted = this.cut(data);
+    const rounded = this.roundTime(cutted);
     this.setState({data: rounded});
   };
 
@@ -71,7 +71,11 @@ export class Data extends Component{
       <DataContext.Provider
         value={{
           fetchData: this.fetchData,
-          getData: this.state.data
+          getData: this.state.data,
+          setMinLikes: minLikes => this.setState({minLikes:minLikes}),
+          setTimeIncrement: timeIncrement => this.setState({timeIncrement:timeIncrement}),
+          setTransformType: transformType => this.setState({transformType:transformType}),
+          getTransformType: this.state.transformType
         }}
       >
         {children}
