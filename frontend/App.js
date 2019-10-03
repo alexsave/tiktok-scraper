@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import BaseGraph from "./components/BaseGraph";
 import {Data} from "./util/Data";
 import Input from "./components/Input";
-import {UnixToSeconds, WeekdayName} from "./util/Conversion";
+import {UnixToSeconds, UnixToSecondsOfWeek, WeekdayName} from "./util/Conversion";
 
 class App extends Component{
   constructor(props){
@@ -14,6 +14,7 @@ class App extends Component{
       <Input/>
       <div style={{display: 'flex', flexWrap: 'wrap'}}>
         <BaseGraph xTitle='Date' map={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
+        <BaseGraph xTitle='Time of Week' map={vid => ({ x: UnixToSecondsOfWeek(vid.uploadDate), y: vid.likes })}/>
         <BaseGraph xTitle='Time of Day' map={vid => ({ x: UnixToSeconds(vid.uploadDate), y: vid.likes })}/>
         {
           [0,1,2,3,4,5,6].map(i =>
