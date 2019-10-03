@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Line} from 'react-chartjs-2';
+import DataProvider, {DataConsumer} from "../util/Data";
 
 const data = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
@@ -35,9 +36,15 @@ class BaseGraph extends Component{
 
   render() {
     return (
-      <div style={{width: '1000px', height: '500px'}}>
-        <Line data={data} />
+      <div>
+        <div style={{width: '1000px', height: '500px'}}>
+          <Line data={data} />
+        </div>
+      <DataConsumer>
+        {(context) => context.getData}
+      </DataConsumer>
       </div>
+
     );
   }
 }

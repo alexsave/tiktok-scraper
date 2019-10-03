@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import BaseGraph from "./components/BaseGraph";
+import {Data} from "./util/Data";
 
 class App extends Component{
   constructor(props){
@@ -7,9 +8,9 @@ class App extends Component{
   }
 
   render(){
-    return <div>
-      <BaseGraph data={{}}/>
-    </div>
+    return <Data>
+      <BaseGraph/>
+    </Data>
   }
 }
 
