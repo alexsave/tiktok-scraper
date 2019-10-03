@@ -18,31 +18,41 @@ export class Data extends Component{
     //data is the current shit
     this.state = {
       all: {},
-      data: []
+      data: [],
+      cutoff: 100
     };
     this.fetchData('qzim');
   }
 
   fetchData = username => {
     if(this.state.all[username]){
-      this.setState(state => ({data: state.all[username]}));
+      this.manipulationPipeline(this.state.all[username]);
+      //this.setState(state => ({data: state.all[username]}));
       return;
     }
 
     if(username === '*')
       axios.get(allUrl, {timeout: -1})
-        .then(this.handleResponse(username));
+        .then(this.handleNetworkResponse(username));
     else
       axios.post(url, { username }, {timeout: -1})
-        .then(this.handleResponse(username));
+        .then(this.handleNetworkResponse(username));
   };
 
-  handleResponse = username => res => {
+  handleNetworkResponse = username => res => {
     if(res.data === "Loading user, try again later")
       return;
     this.state.all[username] = res.data;
-    this.setState({data: res.data});
+    this.manipulationPipeline(res.data);
   };
+
+  cutoff = data => data.filter(vid => vid.likes >= this.state.cutoff);
+
+  manipulationPipeline = data => {
+    const cut = this.cutoff(data);
+    this.setState({data: cut});
+  };
+
 
   render() {
     const {children} = this.props;
