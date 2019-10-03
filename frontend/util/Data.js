@@ -1,19 +1,23 @@
 import axios from 'axios';
 import React, {Component} from 'react';
 
-const DataContext = React.createContext({});
+export const DataContext = React.createContext({});
 
+/**
+ * Fuck it, this will handle loading from the server
+ */
 export class Data extends Component{
   constructor(props){
     super(props);
 
     this.state = {
-      data: 'test'
+      username: 'test'
     };
   }
 
-  updateData = data => {
-    this.setState({data: data});
+  updateData = username => {
+    console.log(username);
+    this.setState({username: username});
   };
 
   render() {

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import BaseGraph from "./components/BaseGraph";
 import {Data} from "./util/Data";
+import Input from "./components/Input";
 
 class App extends Component{
   constructor(props){
@@ -8,9 +9,10 @@ class App extends Component{
   }
 
   render(){
-    return <Data>
+    return (<Data>
+      <Input/>
       <BaseGraph/>
-    </Data>
+    </Data>);
   }
 }
 
