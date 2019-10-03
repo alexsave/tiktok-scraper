@@ -1,11 +1,8 @@
 import TikGraph from "./graph";
+import ReactDOM from 'react-dom';
+import React from "react";
 
-while(document.body.hasChildNodes())
-  document.body.removeChild(document.body.firstChild);
-
-const root = document.createElement('div');
-document.body.appendChild(root);
-new TikGraph(root);
+ReactDOM.render(<div/>, document.querySelector('#root'));
 
 if(module.hot)
   module.hot.accept();

@@ -8,8 +8,9 @@ module.exports = {
     filename: 'bundle.js'
   },
   devServer: {
-    contentBase: path.join(__dirname, 'frontend', 'dist'),
+    contentBase: path.resolve(__dirname, 'frontend', 'dist'),
     port: 3000,
+    publicPath: '/',
     hot: true
   },
   plugins: [
