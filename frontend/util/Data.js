@@ -29,7 +29,6 @@ export class Data extends Component{
   fetchData = username => {
     if(this.state.all[username]){
       this.manipulationPipeline(this.state.all[username]);
-      //this.setState(state => ({data: state.all[username]}));
       return;
     }
 
@@ -50,41 +49,18 @@ export class Data extends Component{
 
   cutoff = data => data.filter(vid => vid.likes >= this.state.minLikes);
 
-  roundTime = data => /*{
-    return*/ data.map(vid => {
-      const time = new Date(vid.uploadDate);
-      if(this.state.timeIncrement !== 's')
-        time.setSeconds(time.getSeconds() >= 30? 60: 0);
-      if(this.state.timeIncrement === 'h')
-        time.setMinutes(time.getMinutes() >= 30? 60: 0);
-      return {...vid, uploadDate: time.getTime()};
-    })/*;
-  }*/;
-
-  //averaging out will combine videos, thus losing invididual video information
-  //be careul
-  transform = data => {
-    if(this.state.transform !== 'avg')
-      return data;
-
-    const timeLikes = {};
-    data.forEach(vid => {
-      if(!timeLikes[vid.uploadDate])
-        timeLikes[vid.uploadDate] = [];
-      timeLikes[vid.uploadDate].push(vid.likes);
-    });
-
-    return Object.keys(timeLikes).map(time => ({
-      uploadDate: time,
-      likes: timeLikes[time].reduce((a,b) => a+b, 0)/timeLikes[time].length
-    }));
-  };
+  roundTime = data => data.map(vid => {
+    const time = new Date(vid.uploadDate);
+    if(this.state.timeIncrement !== 's')
+      time.setSeconds(time.getSeconds() >= 30? 60: 0);
+    if(this.state.timeIncrement === 'h')
+      time.setMinutes(time.getMinutes() >= 30? 60: 0);
+    return {...vid, uploadDate: time.getTime()};
+  });
 
   manipulationPipeline = data => {
     const cut = this.cutoff(data);
     const rounded = this.roundTime(cut);
-    //const transformed = this.transform(rounded);
-    //console.log(transformed);
     this.setState({data: rounded});
   };
 

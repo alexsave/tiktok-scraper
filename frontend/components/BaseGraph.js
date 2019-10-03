@@ -33,11 +33,8 @@ class BaseGraph extends Component{
         <DataConsumer>
           {context => {
             const filtered = context.getData.filter(this.state.filter);
-            //console.log(filtered);
             const mapped = filtered.map(this.state.map);
-            console.log(mapped);
             const data = DataTransform(mapped, 'avg');
-            //console.log(data);
             return <Scatter
               data={{
                 datasets:[{...pointStyle, label: 'likes', data:data}]
