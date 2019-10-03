@@ -14,4 +14,5 @@ export const WeekdayName = [
   'Wednesday',
   'Thursday',
   'Friday',
-  'Saturday'];
+  'Saturday'
+];
