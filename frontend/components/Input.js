@@ -6,13 +6,13 @@ class Input extends Component{
     super(props);
 
     this.state = {
-      username: '',
+      username: 'qzim',
     };
   }
 
   render(){
     return <div>
-      <input onChange={e => this.setState({username: e.target.value})}/>
+      <input value={this.state.username} onChange={e => this.setState({username: e.target.value})}/>
       <DataConsumer>
         {context => <button onClick={() => context.fetchData(this.state.username)}/>}
       </DataConsumer>

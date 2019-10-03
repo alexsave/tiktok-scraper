@@ -18,7 +18,7 @@ export class Data extends Component{
     //data is the current shit
     this.state = {
       all: {},
-      data: {}
+      data: []
     };
   }
 
@@ -28,16 +28,16 @@ export class Data extends Component{
 
     if(username === '*')
       axios.get(allUrl, {timeout: -1})
-        .then(res => {
-          this.state.all[username] = res.data;
-          this.setState({data: res.data});
-        });
+        .then(this.handleResponse(username));
     else
       axios.post(url, { username }, {timeout: -1})
-        .then(res => {
-          this.state.all[username] = res.data;
-          this.setState({data: res.data});
-        });
+        .then(this.handleResponse(username));
+  };
+
+  handleResponse = username => res => {
+    res.data.forEach(vid => vid.uploadDate*= 1000);
+    this.state.all[username] = res.data;
+    this.setState({data: res.data});
   };
 
   render() {
@@ -82,15 +82,6 @@ class DataProvider{
       axios.post(url, { username }, {timeout: -1})
         .then(res => this.graphResponse(res.data));
   }
-
-  unixToSeconds = unix => {
-    let dt = new Date(unix);
-    let res = (dt.getUTCSeconds() + 60* dt.getUTCMinutes() + 60*60 *dt.getUTCHours())*1000;
-    //this is due to gmt vs est
-    if(res < 5*60*60*1000)
-      res += 24*60*60*1000;
-    return res;
-  };
 
   //we have the data in the browser
   graphResponse = res => {

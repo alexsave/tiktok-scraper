@@ -11,7 +11,7 @@ class App extends Component{
   render(){
     return (<Data>
       <Input/>
-      <BaseGraph/>
+      <BaseGraph filter={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
     </Data>);
   }
 }
