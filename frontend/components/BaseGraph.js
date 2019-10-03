@@ -20,17 +20,19 @@ class BaseGraph extends Component{
   constructor(props){
     super(props);
     this.state = {
-      filter: props.filter,
+      map: props.map || (vid => vid),
+      filter: props.filter || (vid => vid),
       xTitle: props.xTitle
     };
   }
 
   render() {
     return (
-      <div style={{width: '1000px', height: '500px'}}>
+      <div style={{width: '900px', height: '500px'}}>
         <DataConsumer>
           {context => {
-            let data = context.getData.map(this.state.filter);
+            let filtered = context.getData.filter(this.state.filter);
+            let data = filtered.map(this.state.map);
             return <Scatter
               data={{
                 datasets:[{...pointStyle, label: 'likes', data:data}]

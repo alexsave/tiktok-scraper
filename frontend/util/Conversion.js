@@ -6,3 +6,12 @@ export const UnixToSeconds = unix => {
   now.setSeconds(dt.getSeconds());
   return now.getTime();
 };
+
+export const WeekdayName = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday'];
