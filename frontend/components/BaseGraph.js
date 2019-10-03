@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Scatter} from 'react-chartjs-2';
 import {DataConsumer} from "../util/Data";
+import {DataTransform} from "../util/StatsFunctions";
 
 const pointStyle = {
   fill: false,
@@ -31,8 +32,12 @@ class BaseGraph extends Component{
       <div style={{width: '900px', height: '500px'}}>
         <DataConsumer>
           {context => {
-            let filtered = context.getData.filter(this.state.filter);
-            let data = filtered.map(this.state.map);
+            const filtered = context.getData.filter(this.state.filter);
+            //console.log(filtered);
+            const mapped = filtered.map(this.state.map);
+            console.log(mapped);
+            const data = DataTransform(mapped, 'avg');
+            //console.log(data);
             return <Scatter
               data={{
                 datasets:[{...pointStyle, label: 'likes', data:data}]

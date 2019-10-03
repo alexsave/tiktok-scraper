@@ -4,6 +4,7 @@ export const UnixToSeconds = unix => {
   now.setHours(dt.getHours());
   now.setMinutes(dt.getMinutes());
   now.setSeconds(dt.getSeconds());
+  now.setMilliseconds(0);
   return now.getTime();
 };
 
@@ -15,6 +16,7 @@ export const UnixToSecondsOfWeek = unix => {
   now.setHours(unixTime.getHours());
   now.setMinutes(unixTime.getMinutes());
   now.setSeconds(unixTime.getSeconds());
+  now.setMilliseconds(0);
   now.setDate(now.getDate() + diffDayOfWeek);
   return now.getTime();
 };
