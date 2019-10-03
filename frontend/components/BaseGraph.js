@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Line} from 'react-chartjs-2';
+import {Scatter} from 'react-chartjs-2';
 import {DataConsumer} from "../util/Data";
 
 //setFullYear(2000)
@@ -14,7 +14,7 @@ const unixToSeconds = unix => {
   return res;
 };
 
-const data = {
+/*const data = {
   labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
   datasets: [
     {
@@ -39,30 +39,31 @@ const data = {
       data: [65, 59, 80, 81, 56, 55, 40]
     }
   ]
-};
+};*/
 
 class BaseGraph extends Component{
   constructor(props){
     super(props);
-    this.state = {filter: props.filter};
+    this.state = {
+      filter: props.filter,
+      xTitle: props.xTitle
+    };
   }
 
   render() {
     return (
-      <div>
-        <div style={{width: '1000px', height: '500px'}}>
-          <Line data={data} />
-          <DataConsumer>
-            {context => {
-              let x = context.getData;
-              console.log(x.map(this.state.filter));
-              return '';
-
-            }}
-          </DataConsumer>
-        </div>
+      <div style={{width: '1000px', height: '500px'}}>
+        <DataConsumer>
+          {context => {
+            let data = context.getData.map(this.state.filter);
+            //the options are really dumb, don't worry too much about them
+            return <Scatter
+              data={{ datasets:[{label: 'likes', data:data}] }}
+              options={{ scales: {xAxes:[{type:'time', scaleLabel:{display:true, labelString:this.state.xTitle}}]} }}
+            />;
+          }}
+        </DataConsumer>
       </div>
-
     );
   }
 }

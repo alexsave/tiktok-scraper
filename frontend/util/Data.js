@@ -20,6 +20,7 @@ export class Data extends Component{
       all: {},
       data: []
     };
+    this.fetchData('qzim');
   }
 
   fetchData = username => {
@@ -35,7 +36,6 @@ export class Data extends Component{
   };
 
   handleResponse = username => res => {
-    res.data.forEach(vid => vid.uploadDate*= 1000);
     this.state.all[username] = res.data;
     this.setState({data: res.data});
   };

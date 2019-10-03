@@ -65,7 +65,7 @@ const responseIntercept = async (response, store, username, callback) => {
     const {id, text, createTime, diggCount, shareCount, commentCount} = item.itemInfos;
     store[id] = {
       url: `https://www.tiktok.com/@${username}/video/${id}`,
-      uploadDate: createTime,
+      uploadDate: parseInt(createTime)*1000,
       likes: parseInt(diggCount),
       comments: parseInt(commentCount),
       shareCount: parseInt(shareCount),
