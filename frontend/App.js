@@ -14,7 +14,7 @@ class App extends Component{
       <Input/>
       <div style={{display: 'flex'}}>
         <BaseGraph xTitle='Date' filter={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
-        <BaseGraph xTitle='Date' filter={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
+        <BaseGraph xTitle='Date' filter={vid => ({ x: UnixToSeconds(vid.uploadDate), y: vid.likes })}/>
       </div>
     </Data>);
   }
