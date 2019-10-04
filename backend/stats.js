@@ -49,8 +49,8 @@ const getScrollVidData = async (page, username, res) => {
   if(error){
     done.done = true;
     console.log('error');
-    map[username] = {timestamp: new Date().getTime(), data: {}};
-    res.send({});
+    map[username] = {timestamp: new Date().getTime(), data: []};
+    res.send([]);
     loading[username] = false;
   }
 
