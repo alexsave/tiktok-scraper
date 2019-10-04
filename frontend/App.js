@@ -18,11 +18,11 @@ class App extends Component{
         <BaseGraph xTitle='Time of Week' map={vid => ({ x: UnixToSecondsOfWeek(vid.uploadDate), y: vid.likes })}/>
         <BaseGraph xTitle='Time of Day' map={vid => ({ x: UnixToSeconds(vid.uploadDate), y: vid.likes })}/>
         {
-          [0,1,2,3,4,5,6].map(i =>
+          /*[0,1,2,3,4,5,6].map(i =>
             <BaseGraph key={WeekdayName[i]} xTitle={WeekdayName[i]}
                        filter={vid => new Date(vid.uploadDate).getDay() === i}
                        map={vid => ({x: UnixToSeconds(vid.uploadDate), y: vid.likes})}/>
-          )
+          )*/
         }
       </div>
     </Data>);
