@@ -47,31 +47,6 @@ export class Data extends Component{
     this.setState({data:res.data});
   };
 
-  //cut = data => data.filter(vid => vid.likes >= this.state.minLikes);
-
-  /*roundTime = data => data.map(vid => {
-    const time = new Date(vid.uploadDate);
-    if(this.state.timeIncrement !== 's')
-      time.setSeconds(time.getSeconds() >= 30? 60: 0);
-    if(this.state.timeIncrement === 'h')
-      time.setMinutes(time.getMinutes() >= 30? 60: 0);
-    return {...vid, uploadDate: time.getTime()};
-  });*/
-
-  /*manipulationPipeline = data => /{
-    const cutted = this.cut(data);
-    const rounded = this.roundTime(cutted);
-    this.setState({data: rounded});
-  };*/
-
-  /*setMinLikes = minLikes =>
-    this.setState({minLikes},
-      () => this.fetchData(this.username));*/
-
-  /*setTimeIncrement = timeIncrement =>
-    this.setState({timeIncrement},
-      () => this.fetchData(this.username));*/
-
   render() {
     const {children} = this.props;
 
