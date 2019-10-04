@@ -23,7 +23,6 @@ export class Data extends Component{
       timeIncrement: 's',
       transformType: 'none'
     };
-    this.fetchData('qzim');
   }
 
   fetchData = username => {

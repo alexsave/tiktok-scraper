@@ -29,7 +29,7 @@ class BaseGraph extends Component{
 
   render() {
     return (
-      <div style={{width: '900px', height: '500px'}}>
+      <div style={{width: '1100px', height: '600px'}}>
         <DataConsumer>
           {context => {
             const cutted = Cut(context.getData, context.getMinLikes);

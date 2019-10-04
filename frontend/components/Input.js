@@ -6,7 +6,7 @@ class Input extends Component{
     super(props);
 
     this.state = {
-      username: 'qzim',
+      username: '',
       minLikes: 0
     };
   }
