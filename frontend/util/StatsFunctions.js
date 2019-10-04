@@ -15,3 +15,15 @@ export const DataTransform = (data, transformType) => {
     y: Math.round(timeLikes[time].reduce((a,b) => a+b, 0)/timeLikes[time].length)
   }));
 };
+
+export const Cut = (data, minLikes) => data.filter(vid => vid.likes >= minLikes);
+
+export const RoundTime = (data, timeIncrement) => data.map(vid => {
+  const time = new Date(vid.uploadDate);
+  if(timeIncrement !== 's')
+    time.setSeconds(time.getSeconds() >= 30? 60: 0);
+  if(timeIncrement === 'h')
+    time.setMinutes(time.getMinutes() >= 30? 60: 0);
+  return {...vid, uploadDate: time.getTime()};
+});
+

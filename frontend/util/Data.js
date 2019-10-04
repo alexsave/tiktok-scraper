@@ -20,16 +20,15 @@ export class Data extends Component{
       all: {},
       data: [],
       minLikes: 0,
-      timeIncrement: 'h',
-      transformType: 'avg'
+      timeIncrement: 's',
+      transformType: 'none'
     };
     this.fetchData('qzim');
-    this.setMinLikes.bind(this);
   }
 
   fetchData = username => {
     if(this.state.all[username]){
-      this.manipulationPipeline(this.state.all[username]);
+      this.setState({data: this.state.all[username]});
       return;
     }
 
@@ -45,30 +44,33 @@ export class Data extends Component{
     if(res.data === "Loading user, try again later")
       return;
     this.state.all[username] = res.data;
-    this.manipulationPipeline(res.data);
+    this.setState({data:res.data});
   };
 
-  cut = data => data.filter(vid => vid.likes >= this.state.minLikes);
+  //cut = data => data.filter(vid => vid.likes >= this.state.minLikes);
 
-  roundTime = data => data.map(vid => {
+  /*roundTime = data => data.map(vid => {
     const time = new Date(vid.uploadDate);
     if(this.state.timeIncrement !== 's')
       time.setSeconds(time.getSeconds() >= 30? 60: 0);
     if(this.state.timeIncrement === 'h')
       time.setMinutes(time.getMinutes() >= 30? 60: 0);
     return {...vid, uploadDate: time.getTime()};
-  });
+  });*/
 
-  manipulationPipeline = data => {
+  /*manipulationPipeline = data => /{
     const cutted = this.cut(data);
     const rounded = this.roundTime(cutted);
     this.setState({data: rounded});
-  };
+  };*/
 
-  setMinLikes = minLikes => {
-    this.setState({minLikes:minLikes})
-      .then(() => this.manipulationPipeline(this.state.data));
-  };
+  /*setMinLikes = minLikes =>
+    this.setState({minLikes},
+      () => this.fetchData(this.username));*/
+
+  /*setTimeIncrement = timeIncrement =>
+    this.setState({timeIncrement},
+      () => this.fetchData(this.username));*/
 
   render() {
     const {children} = this.props;
@@ -78,9 +80,11 @@ export class Data extends Component{
         value={{
           fetchData: this.fetchData,
           getData: this.state.data,
-          setMinLikes: minLikes => this.setMinLikes(minLikes),
-          setTimeIncrement: timeIncrement => this.setState({timeIncrement:timeIncrement}),
-          setTransformType: transformType => this.setState({transformType:transformType}),
+          setMinLikes: minLikes => this.setState({minLikes}),
+          getMinLikes: this.state.minLikes,
+          setTimeIncrement: timeIncrement => this.setState({timeIncrement}),
+          getTimeIncrement: this.state.timeIncrement,
+          setTransformType: transformType => this.setState({transformType}),
           getTransformType: this.state.transformType
         }}
       >

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Scatter} from 'react-chartjs-2';
 import {DataConsumer} from "../util/Data";
-import {DataTransform} from "../util/StatsFunctions";
+import {Cut, DataTransform, RoundTime} from "../util/StatsFunctions";
 
 const pointStyle = {
   fill: false,
@@ -32,7 +32,9 @@ class BaseGraph extends Component{
       <div style={{width: '900px', height: '500px'}}>
         <DataConsumer>
           {context => {
-            const filtered = context.getData.filter(this.state.filter);
+            const cutted = Cut(context.getData, context.getMinLikes);
+            const rounded = RoundTime(cutted, context.getTimeIncrement);
+            const filtered = rounded.filter(this.state.filter);
             const mapped = filtered.map(this.state.map);
             const data = DataTransform(mapped, context.getTransformType);
             return <Scatter

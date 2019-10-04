@@ -13,28 +13,29 @@ class Input extends Component{
   }
 
   InputButtons = context => {
-    //console.log(context.setMinLikes.toString());
     return <div>
       <input value={this.state.username} onChange={e => this.setState({username: e.target.value})}/>
       <button onClick={() => context.fetchData(this.state.username)}>
         Get user info
       </button>
-      <input type='number' value={this.state.minLikes} onChange={e =>
-        this.setState({minLikes: e.target.value})
-      }/>
+      <input type='number' value={this.state.minLikes} onChange={e => {
+        const v = parseInt(e.target.value);
+        this.setState({minLikes: v});
+        context.setMinLikes(v);
+      }}/>
       <button onClick={() => context.setMinLikes(this.state.minLikes)}>
         Set Min Likes
       </button>
 
       {
         ['s', 'm', 'h'].map(i =>
-          <button onClick={() => context.setTimeIncrement(i)}>
+          <button key={i} onClick={() => context.setTimeIncrement(i)}>
             {i}
           </button>)
       }
       {
         ['none', 'avg'].map(tt =>
-          <button onClick={() => context.setTransformType(tt)}>
+          <button key={tt} onClick={() => context.setTransformType(tt)}>
             {tt}
           </button>)
       }
@@ -42,7 +43,7 @@ class Input extends Component{
   };
 
   render(){
-    return <div>
+    return <div style={{position: 'fixed'}}>
       <DataConsumer>
         {context => this.InputButtons(context)}
       </DataConsumer>
