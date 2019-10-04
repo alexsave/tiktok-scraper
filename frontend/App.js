@@ -12,6 +12,7 @@ class App extends Component{
   render(){
     return (<Data>
       <Input/>
+      <div style={{height: '40px'}}/>
       <div style={{display: 'flex', flexWrap: 'wrap'}}>
         <BaseGraph xTitle='Date' map={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
         <BaseGraph xTitle='Time of Week' map={vid => ({ x: UnixToSecondsOfWeek(vid.uploadDate), y: vid.likes })}/>
