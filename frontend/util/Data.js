@@ -27,7 +27,7 @@ export class Data extends Component{
   }
 
   fetchData = username => {
-    if(this.state.all[username]){
+    if(username !== '*' && this.state.all[username]){
       this.setState({data: this.state.all[username]});
       return;
     }
