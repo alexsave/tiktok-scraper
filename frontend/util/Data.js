@@ -24,6 +24,7 @@ export class Data extends Component{
       transformType: 'avg'
     };
     this.fetchData('qzim');
+    this.setMinLikes.bind(this);
   }
 
   fetchData = username => {
@@ -64,6 +65,11 @@ export class Data extends Component{
     this.setState({data: rounded});
   };
 
+  setMinLikes = minLikes => {
+    this.setState({minLikes:minLikes})
+      .then(() => this.manipulationPipeline(this.state.data));
+  };
+
   render() {
     const {children} = this.props;
 
@@ -72,7 +78,7 @@ export class Data extends Component{
         value={{
           fetchData: this.fetchData,
           getData: this.state.data,
-          setMinLikes: (minLikes => this.setState({minLikes:minLikes})),
+          setMinLikes: minLikes => this.setMinLikes(minLikes),
           setTimeIncrement: timeIncrement => this.setState({timeIncrement:timeIncrement}),
           setTransformType: transformType => this.setState({transformType:transformType}),
           getTransformType: this.state.transformType

@@ -26,6 +26,18 @@ class Input extends Component{
         Set Min Likes
       </button>
 
+      {
+        ['s', 'm', 'h'].map(i =>
+          <button onClick={() => context.setTimeIncrement(i)}>
+            {i}
+          </button>)
+      }
+      {
+        ['none', 'avg'].map(tt =>
+          <button onClick={() => context.setTransformType(tt)}>
+            {tt}
+          </button>)
+      }
     </div>
   };
 
