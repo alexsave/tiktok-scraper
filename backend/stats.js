@@ -44,6 +44,16 @@ const getScrollVidData = async (page, username, res) => {
 
   await page.goto(`https://www.tiktok.com/@${username}`, {timeout: 0});
 
+  //error check
+  const error = await page.evaluate(`!!document.querySelector('._error_page_')`);
+  if(error){
+    done.done = true;
+    console.log('error');
+    map[username] = {timestamp: new Date().getTime(), data: {}};
+    res.send({});
+    loading[username] = false;
+  }
+
   await scrollDown(page, 1000, done);
 };
 
