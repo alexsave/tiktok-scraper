@@ -19,7 +19,7 @@ export class Data extends Component{
     this.state = {
       all: {},
       data: [],
-      minLikes: 100,
+      minLikes: 0,
       timeIncrement: 'h',
       transformType: 'avg'
     };
@@ -72,7 +72,7 @@ export class Data extends Component{
         value={{
           fetchData: this.fetchData,
           getData: this.state.data,
-          setMinLikes: minLikes => this.setState({minLikes:minLikes}),
+          setMinLikes: (minLikes => this.setState({minLikes:minLikes})),
           setTimeIncrement: timeIncrement => this.setState({timeIncrement:timeIncrement}),
           setTransformType: transformType => this.setState({transformType:transformType}),
           getTransformType: this.state.transformType
