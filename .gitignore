@@ -6,4 +6,5 @@ backend/stats.json
 stats.json
 frontend/dist
 frontend/public
+*.swp
 

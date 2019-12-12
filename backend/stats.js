@@ -4,6 +4,8 @@ const cors = require('cors');
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3001;
+const cookiesPath = 'cookies.json';
+const jsonfile = require('jsonfile');
 
 require('./cleanup').Cleanup(() => {
   if(loadedCache)
@@ -32,7 +34,7 @@ const getScrollVidData = async (page, username, res) => {
   const done = {done:false};
   await page.setRequestInterception(true);
 
-  page.on('request', request => request.continue());
+  page.on('request', request => requestIntercept(request, username));
   page.on('response', response => responseIntercept(response, vidData, username, () => {
     done.done = true;
     const finalUserData = Object.keys(vidData).map(key => vidData[key]);
@@ -43,6 +45,9 @@ const getScrollVidData = async (page, username, res) => {
   }));
 
   await page.goto(`https://www.tiktok.com/@${username}`, {timeout: 0});
+
+  const cookiesObject = await page.cookies();
+  jsonfile.writeFile(cookiesPath, cookiesObject, {spaces:2}, () => {});
 
   //error check
   const error = await page.evaluate(`!!document.querySelector('._error_page_')`);
@@ -56,6 +61,34 @@ const getScrollVidData = async (page, username, res) => {
 
   await scrollDown(page, 1000, done);
 };
+
+/*
+    We don't set the right headers, so tiktok thinks it's a bot
+*/
+const requestIntercept = async (request, username) => {
+  if(!(request.url().startsWith('https://www.tiktok.com/share'))){
+    request.continue();
+    return;
+  }
+  const headers = {};
+  //none of these work
+  //headers[':authority'] = 'www.tiktok.com';
+  //headers[':method'] = 'GET';
+  //headers[':path'] = request.url().substr(22);//cut off https://www.tiktok.com
+  //headers[':scheme'] = 'https';
+  headers['accept'] = 'application/json, text/plain, */*';
+  headers['accept-encoding'] = 'gzip, deflate, br';
+  headers['accept-language'] = 'en-US,en;q=0.9';
+  //headers['cookie'] = await page.cookies();
+  headers['referer'] = `https://www.tiktok.com/@${username}`;
+  headers['sec-fetch-mode'] = 'cors';
+  headers['sec-fetch-site'] = 'same-origin';
+  //headers['user-agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
+
+  request.continue({headers: headers});
+  //request.continue();
+  
+}
 
 /*
   Some tiktok requests come back in a format that makes it very easy to get video info
@@ -103,11 +136,38 @@ const getUserData = async (username, res) => {
   // Set up browser and page.
   const browser = await puppeteer.launch({
     headless: false,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    ignoreHTTPSErrors: true,
+    userDataDir: './tmp',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--window-position=0,0', '--ignore-certifcate-errors', '--ignore-certifcate-errors-spki-list'],
   });
   const page = await browser.newPage();
   await page.setUserAgent('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0');
   await page.setViewport({width: 1280, height: 926});
+
+  if(fs.existsSync(cookiesPath)){
+    const cookiesArr = JSON.parse(fs.readFileSync(cookiesPath));
+      if(cookiesArr !== 0){
+        for (let cookie of cookiesArr)
+          await page.setCookie(cookie);
+      }
+  }
+
+  const headers = {};
+  //none of these work
+  //headers[':authority'] = 'www.tiktok.com';
+  //headers[':method'] = 'GET';
+  //headers[':path'] = request.url().substr(22);//cut off https://www.tiktok.com
+  //headers[':scheme'] = 'https';
+  headers['accept'] = 'application/json, text/plain, */*';
+  headers['accept-encoding'] = 'gzip, deflate, br';
+  headers['accept-language'] = 'en-US,en;q=0.9';
+  //headers['cookie'] = await page.cookies();
+  headers['referer'] = `https://www.tiktok.com/@${username}`;
+  headers['sec-fetch-mode'] = 'cors';
+  headers['sec-fetch-site'] = 'same-origin';
+  //headers['user-agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
+
+  page.setExtraHTTPHeaders(headers);
 
   getScrollVidData(page, username, res);
 };
