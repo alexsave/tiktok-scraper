@@ -14,14 +14,14 @@ class App extends Component{
       <Input/>
       <div style={{height: '40px'}}/>
       <div style={{display: 'flex', flexWrap: 'wrap'}}>
-        <BaseGraph xTitle='Date' map={vid => ({ x: new Date(vid.uploadDate), y: vid.likes })}/>
-        <BaseGraph xTitle='Time of Week' map={vid => ({ x: UnixToSecondsOfWeek(vid.uploadDate), y: vid.likes })}/>
-        <BaseGraph xTitle='Time of Day' map={vid => ({ x: UnixToSeconds(vid.uploadDate), y: vid.likes })}/>
+        <BaseGraph xTitle='Date' map={vid => ({ x: new Date(vid.time), y: vid.likes })}/>
+        <BaseGraph xTitle='Time of Week' map={vid => ({ x: UnixToSecondsOfWeek(vid.time), y: vid.likes })}/>
+        <BaseGraph xTitle='Time of Day' map={vid => ({ x: UnixToSeconds(vid.time), y: vid.likes })}/>
         {
           /*[0,1,2,3,4,5,6].map(i =>
             <BaseGraph key={WeekdayName[i]} xTitle={WeekdayName[i]}
-                       filter={vid => new Date(vid.uploadDate).getDay() === i}
-                       map={vid => ({x: UnixToSeconds(vid.uploadDate), y: vid.likes})}/>
+                       filter={vid => new Date(vid.time).getDay() === i}
+                       map={vid => ({x: UnixToSeconds(vid.time), y: vid.likes})}/>
           )*/
         }
       </div>
