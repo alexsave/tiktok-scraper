@@ -138,6 +138,13 @@ const loadCache = file => {
     map = JSON.parse(raw.toString());
   }
   catch(err){}
+  //so we currenlty save time as a string
+  Object.keys(map).forEach(key =>
+    Object.keys(map[key]['tiktoks']).forEach(vid =>
+      map[key]['tiktoks'][vid].time = parseInt(map[key]['tiktoks'][vid].time)
+    )
+  );
+  console.log(map['garyvee']);
   loadedCache = true;
   for(let u of Object.keys(map))
     console.log(u);

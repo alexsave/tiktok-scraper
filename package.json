@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "getvideo": "node index.js",
-    "backend": "nodemon backend/stats.js",
+    "backend": "node backend/stats.js",
     "frontend": "webpack-dev-server --watch --open",
     "build-frontend": "webpack --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
