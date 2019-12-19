@@ -141,10 +141,9 @@ const loadCache = file => {
   //so we currenlty save time as a string
   Object.keys(map).forEach(key =>
     Object.keys(map[key]['tiktoks']).forEach(vid =>
-      map[key]['tiktoks'][vid].time = parseInt(map[key]['tiktoks'][vid].time)
+      map[key]['tiktoks'][vid].time = parseInt(map[key]['tiktoks'][vid].time)*1000
     )
   );
-  console.log(map['garyvee']);
   loadedCache = true;
   for(let u of Object.keys(map))
     console.log(u);
