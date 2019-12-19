@@ -3,8 +3,8 @@ node_modules/
 videos/
 *.mp4
 backend/stats.json
-stats.json
+*.json
 frontend/dist
 frontend/public
 *.swp
-
+tmp/
