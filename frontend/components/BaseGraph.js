@@ -33,7 +33,6 @@ class BaseGraph extends Component{
         <DataConsumer>
           {context => {
             //to get rid of musical.ly shit
-            console.log(context.getData);
             const tiktok = context.getData;//.filter(vid => vid.time > new Date('2 August 2018').getTime());
             const cutted = Cut(tiktok, context.getMinLikes);
             const rounded = RoundTime(cutted, context.getTimeIncrement);
