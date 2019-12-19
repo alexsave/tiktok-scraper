@@ -7,16 +7,12 @@ const port = process.env.PORT || 3001;
 const cookiesPath = 'cookies.json';
 const jsonfile = require('jsonfile');
 
-require('./cleanup').Cleanup(() => {
-  if(loadedCache)
-    fs.writeFileSync(FILE, JSON.stringify(map));
-});
 
 //the master array of all shit
 let loadedCache = false;
 const loading = {};
 let map = {};
-const FILE = './stats.json';
+const FILE = './data.json';
 
 const scrollDown = async (page, scrollDelay, done) => {
   while(done.done === false){
@@ -125,51 +121,15 @@ const getUserData = async (username, res) => {
   //check the cache
   const cached = map[username];
   if(cached){
-    if(new Date().getTime() - cached.timestamp <= 1000*60*60*24){
-      res.send(cached.data);
-      console.log(`sent ${username}`);
-      loading[username] = false;
-      return;
-    }
+    res.send(Object.values(cached.tiktoks));
+    console.log(`sent ${username}`);
+    loading[username] = false;
+    return;
   }
-
-  // Set up browser and page.
-  const browser = await puppeteer.launch({
-    headless: false,
-    ignoreHTTPSErrors: true,
-    userDataDir: './tmp',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--window-position=0,0', '--ignore-certifcate-errors', '--ignore-certifcate-errors-spki-list'],
-  });
-  const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0');
-  await page.setViewport({width: 1280, height: 926});
-
-  if(fs.existsSync(cookiesPath)){
-    const cookiesArr = JSON.parse(fs.readFileSync(cookiesPath));
-      if(cookiesArr !== 0){
-        for (let cookie of cookiesArr)
-          await page.setCookie(cookie);
-      }
+  else{
+    res.send([]);
+    return;
   }
-
-  const headers = {};
-  //none of these work
-  //headers[':authority'] = 'www.tiktok.com';
-  //headers[':method'] = 'GET';
-  //headers[':path'] = request.url().substr(22);//cut off https://www.tiktok.com
-  //headers[':scheme'] = 'https';
-  headers['accept'] = 'application/json, text/plain, */*';
-  headers['accept-encoding'] = 'gzip, deflate, br';
-  headers['accept-language'] = 'en-US,en;q=0.9';
-  //headers['cookie'] = await page.cookies();
-  headers['referer'] = `https://www.tiktok.com/@${username}`;
-  headers['sec-fetch-mode'] = 'cors';
-  headers['sec-fetch-site'] = 'same-origin';
-  //headers['user-agent'] = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36';
-
-  page.setExtraHTTPHeaders(headers);
-
-  getScrollVidData(page, username, res);
 };
 
 const loadCache = file => {
@@ -177,7 +137,7 @@ const loadCache = file => {
     let raw = fs.readFileSync(file);
     map = JSON.parse(raw.toString());
   }
-  catch(err){};
+  catch(err){}
   loadedCache = true;
   for(let u of Object.keys(map))
     console.log(u);
@@ -194,7 +154,7 @@ app.post('/username', (req, res) => {
   const username = req.body.username;
   console.log('get', username);
   if(loading[username]){
-    res.send('Loading user, try again later');
+    res.send([]);
     return;
   }
   loading[username] = true;
@@ -205,12 +165,12 @@ app.post('/username', (req, res) => {
 //get all timestamps we have in memory, regardless of user
 app.get('/all', (req, res) => {
   console.log('get *');
-  const arrays = Object.values(map).map(user => user.data);
+  const arrays = Object.values(map).map(user => Object.values(user.tiktoks));
   const final = [].concat(...arrays);
 
   res.send(final);
+  console.log('sent *');
 });
 
 app.listen(port, () => console.log(`listening on port ${port}`));
 
-process.stdin.resume();

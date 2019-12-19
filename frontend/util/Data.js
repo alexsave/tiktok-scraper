@@ -40,7 +40,7 @@ export class Data extends Component{
   };
 
   handleNetworkResponse = username => res => {
-    if(res.data === "Loading user, try again later")
+    if(res.data === "no")
       return;
     this.state.all[username] = res.data;
     this.setState({data:res.data});
