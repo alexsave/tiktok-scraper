@@ -6,6 +6,10 @@ const {execSync} = require('child_process');
 
 let vids = [];
 
+let map = {};
+const FILE = './data.json';
+
+
 function extractItems() {
   const extractedElements = document.querySelectorAll('._video_feed_item a');
   const items = [];
@@ -97,5 +101,8 @@ async function run(username){
   execSync('rm -rf videos/');
 
 }
+
+let raw = fs.readFileSync(FILE);
+map = JSON.parse(raw);
 
 run('qzim');
