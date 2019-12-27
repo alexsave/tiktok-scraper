@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "getvideo": "node index.js",
+    "getvideo": "node backend/index.js",
     "backend": "node backend/stats.js",
     "frontend": "webpack-dev-server --watch --open",
     "build-frontend": "webpack --mode production",
