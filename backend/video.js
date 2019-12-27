@@ -43,15 +43,18 @@ async function scrapeInfiniteScrollItems(
 }
 
 async function downloadVid(page, url){
-
   await page.goto(url, {
     waitUntil: 'load', timeout: 0
   });
 
-  const vidElem = await page.evaluate(() => document.querySelector('video'));
-  if(!vidElem)
+  let src;
+  try{
+    src = await page.evaluate(() => document.querySelector('video').src);
+  }
+  catch(e){
     return;
-  const {src} = vidElem;
+  }
+
 
   const response = await axios({
     url: src,
@@ -60,9 +63,10 @@ async function downloadVid(page, url){
   });
 
   const fileName = url.split('/').pop() + '.mp4';
-  const location = path.resolve(__dirname, 'videos', fileName);
+  const location = path.resolve(__dirname, '..', 'videos', fileName);
   fs.writeFileSync(location, response.data );
   vids.push(location);
+  await page.waitFor(500);
 }
 
 async function run(username){
@@ -94,14 +98,17 @@ async function run(username){
   //for(let item of items)
     //await downloadVid(page, item);
   const ids = Object.keys(userdata.tiktoks);
-  const urls = ids.map(id => `https://www.tiktok.com/@${username}/video/${id}`);
+  let urls = ids.map(id => `https://www.tiktok.com/@${username}/video/${id}`);
+  urls = urls.reverse();
   //for(let url of urls)
     //await downloadVid(page, url);
+  console.log(urls[0]);
   await downloadVid(page, urls[0]);
 
   // Close the browser.
   await browser.close();
 
+  //video composition
   for(let vid of vids)
     execSync(`ffmpeg -i ${vid} -c copy -bsf:v h264_mp4toannexb ${vid}.ts`);
 
@@ -110,7 +117,6 @@ async function run(username){
   execSync(`ffmpeg -i "concat:${something}" -c copy -absf aac_adtstoasc ${username}.mp4`);
 
   execSync('rm -rf videos/');
-
 }
 
 let raw = fs.readFileSync(FILE);
