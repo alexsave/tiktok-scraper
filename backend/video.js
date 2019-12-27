@@ -48,7 +48,10 @@ async function downloadVid(page, url){
     waitUntil: 'load', timeout: 0
   });
 
-  const src = await page.evaluate(() => document.querySelector('video').src);
+  const vidElem = await page.evaluate(() => document.querySelector('video'));
+  if(!vidElem)
+    return;
+  const {src} = vidElem;
 
   const response = await axios({
     url: src,
@@ -63,8 +66,11 @@ async function downloadVid(page, url){
 }
 
 async function run(username){
-  if(!map[username])
+  const userdata = map[username];
+  if(!userdata)
     console.log('user not available');
+  execSync('rm -rf videos && mkdir videos');
+  execSync('rm -f output.mp4');
   // Set up browser and page.
   const browser = await puppeteer.launch({
     headless: false,
@@ -73,7 +79,7 @@ async function run(username){
   const page = await browser.newPage();
   await page.setViewport({width: 1280, height: 926});
 
-  // Navigate to the demo page.
+  /*// Navigate to the demo page.
   await page.goto('https://tiktok.com/@' + username,{
     waitUntil: 'load', timeout: 0
   });
@@ -82,13 +88,16 @@ async function run(username){
   let items = await scrapeInfiniteScrollItems(page, extractItems, 120);
   //old to new
   items = items.reverse();
-  items.pop();
+  items.pop();*/
 
-  execSync('rm -rf videos && mkdir videos');
-  execSync('rm -f output.mp4');
 
-  for(let item of items)
-    await downloadVid(page, item);
+  //for(let item of items)
+    //await downloadVid(page, item);
+  const ids = Object.keys(userdata.tiktoks);
+  const urls = ids.map(id => `https://www.tiktok.com/@${username}/video/${id}`);
+  //for(let url of urls)
+    //await downloadVid(page, url);
+  await downloadVid(page, urls[0]);
 
   // Close the browser.
   await browser.close();
