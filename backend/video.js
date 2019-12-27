@@ -6,7 +6,7 @@ const {execSync} = require('child_process');
 
 let vids = [];
 
-let map = {};
+let map;
 const FILE = './data.json';
 
 
@@ -63,9 +63,11 @@ async function downloadVid(page, url){
 }
 
 async function run(username){
+  if(!map[username])
+    console.log('user not available');
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    //headless: false,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -104,5 +106,6 @@ async function run(username){
 
 let raw = fs.readFileSync(FILE);
 map = JSON.parse(raw);
+console.log('loaded file');
 
 run('qzim');
