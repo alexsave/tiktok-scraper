@@ -44,7 +44,7 @@ const downloadFromSrc = (src, location, cb) => {
     .on('finish', () => {
       console.log(location);
       vids.push(location);
-      setTimeout(cb, 500);
+      setTimeout(cb, 800);
     })
     .on('error', cb);
 };
