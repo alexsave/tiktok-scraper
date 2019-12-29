@@ -1,4 +1,6 @@
 const fs = require('fs');
+const https = require('https');
+const zlib = require('zlib');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const axios = require('axios');
@@ -10,17 +12,16 @@ let map;
 const FILE = './data.json';
 
 async function downloadVid(page, url){
-  await page.goto(url, {
-    waitUntil: 'load', timeout: 0
+  const options = {
+    headers: {'Accept-Encoding': 'gzip', 'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:71.0) Gecko/20100101 Firefox/71.0'}
+  };
+  const buffer = [];
+  https.get(url, options, res => {
+    const gunzip = zlib.createGunzip();
+    res.pipe(gunzip);
+    gunzip.on('data', data => buffer.push(data.toString()));
+    gunzip.on('end', () => console.log(buffer.join('')));
   });
-
-  let src;
-  try{
-    src = await page.evaluate(() => document.querySelector('video').src);
-  }
-  catch(e){
-    return;
-  }
 
   const response = await axios({
     url: src,
@@ -52,8 +53,9 @@ async function run(username){
   const ids = Object.keys(userdata.tiktoks);
   let urls = ids.map(id => `https://www.tiktok.com/@${username}/video/${id}`);
   urls = urls.reverse();
-  for(let url of urls)
-    await downloadVid(page, url);
+  //for(let url of urls)
+  //await downloadVid(page, url);
+  await downloadVid(page, urls[0]);
 
   // Close the browser.
   await browser.close();
