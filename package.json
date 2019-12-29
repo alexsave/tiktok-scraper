@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "getvideo": "node backend/video.js",
+    "curlvideo": "node backend/video2.js",
     "backend": "node backend/stats.js",
     "frontend": "webpack-dev-server --watch --open",
     "build-frontend": "webpack --mode production",
