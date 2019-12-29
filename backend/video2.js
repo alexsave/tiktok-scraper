@@ -41,7 +41,7 @@ const downloadVids = (urls, cb) => {
         .on('finish', () => {
           console.log(location);
           vids.push(location);
-          downloadVids(urls, cb);
+          setTimeout(() => downloadVids(urls, cb), 500);
         })
         .on('error', () =>
           downloadVids(urls, cb)
@@ -60,10 +60,10 @@ function run(username){
 
   const ids = Object.keys(userdata.tiktoks);
   let urls = ids.map(id => `https://www.tiktok.com/@${username}/video/${id}`);
-  downloadVids(urls, composeVideos);
+  downloadVids(urls, () => composeVideos(username));
 }
 
-const composeVideos = () => {
+const composeVideos = username => {
   //video composition
   for(let vid of vids)
     execSync(`ffmpeg -i ${vid} -c copy -bsf:v h264_mp4toannexb ${vid}.ts`);
