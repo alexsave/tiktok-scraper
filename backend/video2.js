@@ -32,23 +32,21 @@ const downloadVids = (urls, cb) => {
       if(!src)
         downloadVids(urls, cb);
 
-      //downloadFromSrc(src, () => downloadVids(urls, cb));
-      const file = fs.createWriteStream(location);
-      request({
-        url: src
-      })
-        .pipe(file)
-        .on('finish', () => {
-          console.log(location);
-          vids.push(location);
-          setTimeout(() => downloadVids(urls, cb), 500);
-        })
-        .on('error', () =>
-          downloadVids(urls, cb)
-        );
-
+      downloadFromSrc(src, location, () => downloadVids(urls, cb));
     });
   });
+};
+
+const downloadFromSrc = (src, location, cb) => {
+  const file = fs.createWriteStream(location);
+  request({ url: src })
+    .pipe(file)
+    .on('finish', () => {
+      console.log(location);
+      vids.push(location);
+      setTimeout(cb, 500);
+    })
+    .on('error', cb);
 };
 
 function run(username){
