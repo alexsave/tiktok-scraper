@@ -46,6 +46,10 @@ const downloadVids = (urls, cb) => {
     res.pipe(gunzip);
     gunzip.on('data', data => buffer.push(data.toString()));
     gunzip.on('end', () => {
+      const raw = buffer.join('');
+      //we'll use regex, no fancy modules
+      const regex =/<video.*?src="(.*?)"/gm;
+      console.log(regex.exec(raw)[1]);
 
       downloadVids(urls, cb);
     });
