@@ -8,9 +8,10 @@ module.exports = {
     filename: 'bundle.js'
   },
   devServer: {
-    contentBase: path.resolve(__dirname, 'frontend', 'dist'),
+    static: {
+      directory: path.resolve(__dirname, 'frontend', 'dist')
+    },
     port: 3000,
-    publicPath: '/',
     hot: true
   },
   plugins: [
